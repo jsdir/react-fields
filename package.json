@@ -1,0 +1,19 @@
+{
+  "name": "react-fields",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jsdir/react-fields.git"
+  },
+  "author": "Jason Sommer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jsdir/react-fields/issues"
+  },
+  "homepage": "https://github.com/jsdir/react-fields#readme"
+}
