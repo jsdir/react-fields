@@ -15,5 +15,13 @@
   "bugs": {
     "url": "https://github.com/jsdir/react-fields/issues"
   },
-  "homepage": "https://github.com/jsdir/react-fields#readme"
+  "homepage": "https://github.com/jsdir/react-fields#readme",
+  "devDependencies": {
+    "babel-plugin-transform-regenerator": "^6.4.4",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-react": "^6.3.13",
+    "babel-preset-stage-0": "^6.3.13",
+    "invariant": "^2.2.0",
+    "titleize": "^1.0.0"
+  }
 }
