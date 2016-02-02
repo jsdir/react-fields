@@ -1,12 +1,11 @@
 import _ from 'lodash'
-import React, {PropTypes} from 'react'
+import React, { PropTypes } from 'react'
 import invariant from 'invariant'
 import titleize from 'titleize'
 
+// Default field components
 import TextInput from './components/TextInput'
 import NumberInput from './components/NumberInput'
-
-// import checkSchema from './check-schema'
 
 class Fields extends React.Component {
 
@@ -14,17 +13,22 @@ class Fields extends React.Component {
     /**
      * The field schema
      */
-    schema: PropTypes.object.isRequired,
+    schema: PropTypes.objectOf(
+      PropTypes.shape({
+        title: PropTypes.string,
+        type: PropTypes.string.isRequired,
+        rules: PropTypes.object,
+        fieldComponent: PropType.func,
+        fieldComponentProps: PropType.object
+      })
+    ).isRequired,
+    render: PropTypes.func,
     /**
-     * renderFunc(field) is called with a field context as the first argument
-     */
-    renderFunc: PropTypes.func.isRequired,
-    /**
-     * The field values.
+     * The field values
      */
     value: PropTypes.object,
     /**
-     * onChange(fields, fieldName, fieldValue)
+     * onChange(values, fieldName, fieldValue)
      */
     onChange: PropTypes.func,
     /**
@@ -32,11 +36,11 @@ class Fields extends React.Component {
      */
     errors: PropTypes.object,
     /**
-     * Set to true to render the values without the field component.
+     * If true, renders the values without the field component
      */
     readOnly: PropTypes.bool,
     /**
-     * Set to true to show a label beside each field.
+     * If true, shows a label beside each field
      */
     showLabels: PropTypes.bool,
     /**
@@ -45,29 +49,31 @@ class Fields extends React.Component {
      */
     fieldComponents: PropTypes.object,
     /**
-     * An array of fields to display.
+     * An array of fields to display. If this is not specificed, all
+     * fields will be displayed.
      */
     fields: PropTypes.array
   };
 
   static defaultProps = {
-    fieldComponents: {}
+    fieldComponents: {},
+    render: this.renderAllFields
   };
 
-  constructor(props) {
-    super(props)
+  constructor() {
+    super(...constructor)
     this.state = {
       values: this.props.value || {}
     }
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState({values: nextProps.value})
+    this.setState({ values: nextProps.value })
   }
 
   changeField(fieldName, value) {
-    const values = {...this.state.values, [fieldName]: value}
-    this.setState({values})
+    const values = { ...this.state.values, [fieldName]: value }
+    this.setState({ values })
     if (this.props.onChange) {
       this.props.onChange(values, fieldName, value)
     }
@@ -77,19 +83,22 @@ class Fields extends React.Component {
     const fieldSchema = this.props.schema[fieldName]
     invariant(
       !!fieldSchema,
-      `render('${fieldName}') failed because the field "${fieldName}" is not defined in the schema.`
+      `render('${fieldName}') failed because the field "${fieldName}" `
+        + `is not defined in the schema.`
     )
 
-    const FieldComponent = fieldSchema.component || this.props.fieldComponents[fieldSchema.type]
+    const FieldComponent = fieldSchema.component
+      || this.props.fieldComponents[fieldSchema.type]
 
     invariant(
       FieldComponent,
-      `field "${fieldName}" has a type "${fieldSchema.type}" that does not have a component`
+      `field "${fieldName}" has a type "${fieldSchema.type}" that does not `
+        + `have a component`
     )
 
     const errorMessage = (this.props.errors || {})[fieldName]
     const error = errorMessage ? (
-      <span className="Field--error">{errorMessage}</span>
+      <span className="Field-error">{errorMessage}</span>
     ) : null
 
     return (
@@ -110,7 +119,9 @@ class Fields extends React.Component {
     const sortedFieldNames = this.props.fields || _.sortBy(fieldNames)
     const items = _.map(sortedFieldNames, fieldName => (
       <div key={fieldName}>
-        <label>{this.props.schema[fieldName].title || titleize(fieldName)}</label>
+        <label>
+          {this.props.schema[fieldName].title || titleize(fieldName)}
+        </label>
         {this.renderField(fieldName)}
       </div>
     ))
@@ -119,31 +130,19 @@ class Fields extends React.Component {
   }
 
   render() {
-    return (this.props.renderFunc || this.renderAllFields)({
-      render: ::this.renderField
-    })
+    return this.props.render({ render: ::this.renderField })
   }
 }
 
-export function renderFields(schema, options, renderFunc) {
-  // TODO: checkSchema(schema)
-
-  // Allow the function to be called with (schema, renderFunc)
-  if (!renderFunc) {
-    renderFunc = options
-    options = {}
-  }
-
-  return (
-    <Fields
-      schema={schema}
-      renderFunc={renderFunc}
-      {...options}
-    />
-  )
-}
-
-export function createFieldRenderer(baseOptions) {
+/**
+ * Creates a `renderFields` function with a specified set of base
+ * options. If no options are specified, sensible defaults will be
+ * used instead.
+ *
+ * @param {?Object} baseOptions - base options for `renderFields`
+ */
+export const createFieldRenderer = (baseOptions) => {
+  // Use defaults if no base options are specified.
   baseOptions = baseOptions || {
     fieldComponents: {
       string: TextInput,
@@ -153,20 +152,22 @@ export function createFieldRenderer(baseOptions) {
 
   return (schema, options, renderFunc) => (
     renderFields(
-      schema, _.extend({}, baseOptions, options), renderFunc
+      schema, { ...baseOptions, ...options }, renderFunc
     )
   )
-}
+};
 
-export function bindField(component, path) {
-  return {
-    value: _.get(component.state, path),
-    onChange: value => {
-
-      component.setState(_.set(component.state, path, {
-        ..._.get(component.state, path),
-        ...value
-      }))
-    }
-  }
-}
+/**
+ * A helper for rendering the `Fields` component.
+ *
+ * @param {Object} schema - `props.schema`
+ * @param {?Object} options - `props`
+ * @param {?Function} render - `props.render`
+ */
+export const renderFields = (schema, options, render) => (
+  <Fields
+    schema={schema}
+    render={render}
+    {...options}
+  />
+)

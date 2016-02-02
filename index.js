@@ -1,6 +1,15 @@
+// Fields
 export {
   createFieldRenderer,
-  bindField,
-  renderFields as default
-} from './fields'
-export { validate, awaitHash } from './validate'
+  renderFields
+} from './lib/fields'
+
+// Forms
+export {
+  createFormRenderer,
+  renderForm
+} from './lib/form'
+
+// Utils
+export { validate } from './lib/validate'
+export { bindValue, awaitHash } from './lib/utils'
