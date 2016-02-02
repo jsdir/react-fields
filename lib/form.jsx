@@ -29,7 +29,7 @@ class Form extends React.Component {
      */
     renderSubmitButton: PropTypes.func.isRequired,
     buttonTitle: PropTypes.string
-  };
+  }
 
   static defaultProps = {
     validate,
@@ -52,20 +52,34 @@ class Form extends React.Component {
     this.setState({ values })
   }
 
-  async save() {
+  async submit() {
+    this.setState({ errors: null })
+
+    const fieldErrors = await this.props.validate(this.props.schema, this.state.values)
+    if (!_.isEmpty(fieldErrors)) {
+      this.setState({ errors: { fieldErrors } })
+      return
+    }
+
     // validate
     let errors
     try {
       errors = await this.props.submit(this.state.values)
-    } catch (c) {
-      console.log(c)
+    } catch (err) {
+      this.setState({
+        errors: {
+          summaryError: 'There was an error submitting the form'
+        }
+      })
+      return
     }
 
     this.setState({ errors })
   }
 
   renderError() {
-    const error = this.props.errors && this.props.errors.summaryError
+    const error = this.state.errors
+      && this.state.errors.summaryError
     return error ? (
       <div className="Form-error">{error}</div>
     ) : null
@@ -77,7 +91,7 @@ class Form extends React.Component {
       fields: this.props.fields,
       showLabels: this.props.showLabels,
       fieldComponents: this.props.fieldComponents,
-      errors: this.props.errors && this.props.errors.fieldErrors
+      errors: this.state.errors && this.state.errors.fieldErrors
     }
 
     return (
@@ -113,7 +127,7 @@ export const createFormRenderer = (baseOptions) => {
  * `props.submit` will be called with the field values, and it will
  * respect an error payload in return.
  */
-export const renderForm = (schema, options, renderFunc) => (
+export const renderForm = (schema, options, render) => (
   <Form
     schema={schema}
     render={render}

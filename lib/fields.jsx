@@ -18,8 +18,8 @@ class Fields extends React.Component {
         title: PropTypes.string,
         type: PropTypes.string.isRequired,
         rules: PropTypes.object,
-        fieldComponent: PropType.func,
-        fieldComponentProps: PropType.object
+        fieldComponent: PropTypes.func,
+        fieldComponentProps: PropTypes.object
       })
     ).isRequired,
     render: PropTypes.func,
@@ -56,19 +56,20 @@ class Fields extends React.Component {
   };
 
   static defaultProps = {
-    fieldComponents: {},
-    render: this.renderAllFields
+    fieldComponents: {}
   };
 
-  constructor() {
-    super(...constructor)
+  constructor(props) {
+    super(...arguments)
     this.state = {
-      values: this.props.value || {}
+      values: props.value || {}
     }
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState({ values: nextProps.value })
+    if (nextProps.value) {
+      this.setState({ values: nextProps.value })
+    }
   }
 
   changeField(fieldName, value) {
@@ -130,7 +131,9 @@ class Fields extends React.Component {
   }
 
   render() {
-    return this.props.render({ render: ::this.renderField })
+    return (this.props.render || ::this.renderAllFields)({
+      render: ::this.renderField
+    })
   }
 }
 
@@ -142,20 +145,19 @@ class Fields extends React.Component {
  * @param {?Object} baseOptions - base options for `renderFields`
  */
 export const createFieldRenderer = (baseOptions) => {
-  // Use defaults if no base options are specified.
-  baseOptions = baseOptions || {
-    fieldComponents: {
-      string: TextInput,
-      number: NumberInput
-    }
-  }
-
   return (schema, options, renderFunc) => (
     renderFields(
-      schema, { ...baseOptions, ...options }, renderFunc
+      schema, {
+        fieldComponents: {
+          string: TextInput,
+          number: NumberInput
+        },
+        ...baseOptions,
+        ...options
+      }, renderFunc
     )
   )
-};
+}
 
 /**
  * A helper for rendering the `Fields` component.
@@ -164,10 +166,20 @@ export const createFieldRenderer = (baseOptions) => {
  * @param {?Object} options - `props`
  * @param {?Function} render - `props.render`
  */
-export const renderFields = (schema, options, render) => (
-  <Fields
-    schema={schema}
-    render={render}
-    {...options}
-  />
-)
+export const renderFields = (schema, options, render) => {
+  options = {
+    fieldComponents: {
+      string: TextInput,
+      number: NumberInput
+    },
+    ..._.pickBy(options, v => v)
+  }
+
+  return (
+    <Fields
+      schema={schema}
+      render={render}
+      {...options}
+    />
+  )
+}
