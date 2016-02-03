@@ -27,19 +27,14 @@ class Form extends React.Component {
      * button types and text will change, you can specify a different
      * type of button for the form.
      */
-    renderSubmitButton: PropTypes.func.isRequired,
     buttonTitle: PropTypes.string,
 
-    submitComponent: PropTypes.node
+    submitComponent: PropTypes.node.isRequired,
+    submitComponentProps: PropTypes.object
   };
 
   static defaultProps = {
-    validate,
-    renderSubmitButton: (onClick, props) => (
-      <button onClick={onClick}>
-        {props.buttonTitle || 'Submit'}
-      </button>
-    )
+    validate
   };
 
   constructor() {
@@ -99,14 +94,19 @@ class Form extends React.Component {
       fields: this.props.fields,
       showLabels: this.props.showLabels,
       fieldComponents: this.props.fieldComponents,
-      errors: this.state.errors && this.state.errors.fieldErrors
+      errors: this.state.errors && this.state.errors.fieldErrors,
+      fieldsContext: {
+        Submit: React.cloneElement(this.props.submitComponent, {
+          ...this.props.submitComponentProps,
+          onClick: ::this.submit
+        })
+      }
     }
 
     return (
       <div className="Form">
         {this.renderError()}
         {renderFields(this.props.schema, options, this.props.render)}
-        {this.props.renderSubmitButton(::this.submit, this.props)}
       </div>
     )
   }

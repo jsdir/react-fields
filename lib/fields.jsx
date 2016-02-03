@@ -52,7 +52,8 @@ class Fields extends React.Component {
      * An array of fields to display. If this is not specificed, all
      * fields will be displayed.
      */
-    fields: PropTypes.array
+    fields: PropTypes.array,
+    fieldsContext: PropTypes.object
   };
 
   static defaultProps = {
@@ -107,9 +108,9 @@ class Fields extends React.Component {
         {error}
         <FieldComponent
           value={this.state.values[fieldName]}
-          onChange={(value) => this.changeField(fieldName, value)}
+          onChange={value => this.changeField(fieldName, value)}
           {...fieldSchema.fieldComponentProps}
-          // TODO: reconcile
+          // TODO: merge onChange
         />
       </div>
     )
@@ -133,7 +134,8 @@ class Fields extends React.Component {
 
   render() {
     return (this.props.render || ::this.renderAllFields)({
-      render: ::this.renderField
+      render: ::this.renderField,
+      ...this.props.fieldsContext
     })
   }
 }
