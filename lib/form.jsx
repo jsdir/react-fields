@@ -29,7 +29,7 @@ class Form extends React.Component {
      */
     buttonTitle: PropTypes.string,
 
-    submitComponent: PropTypes.node.isRequired,
+    submitComponent: PropTypes.func.isRequired,
     submitComponentProps: PropTypes.object
   };
 
