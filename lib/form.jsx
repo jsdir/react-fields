@@ -88,6 +88,16 @@ class Form extends React.Component {
     ) : null
   }
 
+  renderSubmit() {
+    const Submit = this.props.submitComponent
+    return (
+      <Submit
+        {...this.props.submitComponentProps}
+        onClick={::this.submit}
+      </Submit>
+    )
+  }
+
   render() {
     const SubmitComponent = this.props.submitComponent
     const Submit = (
@@ -103,7 +113,10 @@ class Form extends React.Component {
       showLabels: this.props.showLabels,
       fieldComponents: this.props.fieldComponents,
       errors: this.state.errors && this.state.errors.fieldErrors,
-      fieldsContext: { Submit }
+      fieldsContext: {
+        renderSubmit: ::this.renderSubmit,
+        submit: ::this.submit
+      }
     }
 
     return (
