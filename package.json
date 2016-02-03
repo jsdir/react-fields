@@ -1,6 +1,6 @@
 {
   "name": "react-fields",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "main": "./dist/index.js",
   "scripts": {
@@ -21,6 +21,7 @@
   "homepage": "https://github.com/jsdir/react-fields#readme",
   "dependencies": {
     "invariant": "^2.2.0",
+    "lodash": "^4.2.1",
     "titleize": "^1.0.0"
   },
   "devDependencies": {
