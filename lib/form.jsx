@@ -31,7 +31,7 @@ class Form extends React.Component {
     buttonTitle: PropTypes.string,
 
     submitComponent: PropTypes.node
-  }
+  };
 
   static defaultProps = {
     validate,
