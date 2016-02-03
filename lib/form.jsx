@@ -88,11 +88,12 @@ class Form extends React.Component {
     ) : null
   }
 
-  renderSubmit() {
+  renderSubmit(props) {
     const Submit = this.props.submitComponent
     return (
       <Submit
         {...this.props.submitComponentProps}
+        {...props}
         onClick={::this.submit}
       />
     )
