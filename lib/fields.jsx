@@ -109,6 +109,7 @@ class Fields extends React.Component {
           value={this.state.values[fieldName]}
           onChange={(value) => this.changeField(fieldName, value)}
           {...fieldSchema.fieldComponentProps}
+          // TODO: reconcile
         />
       </div>
     )

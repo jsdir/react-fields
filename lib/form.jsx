@@ -28,7 +28,9 @@ class Form extends React.Component {
      * type of button for the form.
      */
     renderSubmitButton: PropTypes.func.isRequired,
-    buttonTitle: PropTypes.string
+    buttonTitle: PropTypes.string,
+
+    submitComponent: PropTypes.node
   }
 
   static defaultProps = {
@@ -53,9 +55,11 @@ class Form extends React.Component {
   }
 
   async submit() {
+    const { values } = this.state
+
     this.setState({ errors: null })
 
-    const fieldErrors = await this.props.validate(this.props.schema, this.state.values)
+    const fieldErrors = await this.props.validate(this.props.schema, values)
     if (!_.isEmpty(fieldErrors)) {
       this.setState({ errors: { fieldErrors } })
       return
@@ -64,7 +68,7 @@ class Form extends React.Component {
     // validate
     let errors
     try {
-      errors = await this.props.submit(this.state.values)
+      errors = await this.props.submit(values)
     } catch (err) {
       this.setState({
         errors: {
@@ -75,6 +79,10 @@ class Form extends React.Component {
     }
 
     this.setState({ errors })
+
+    if (this.props.afterSubmit) {
+      this.props.afterSubmit(values)
+    }
   }
 
   renderError() {
