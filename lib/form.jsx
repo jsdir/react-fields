@@ -94,7 +94,7 @@ class Form extends React.Component {
       <Submit
         {...this.props.submitComponentProps}
         onClick={::this.submit}
-      </Submit>
+      />
     )
   }
 
