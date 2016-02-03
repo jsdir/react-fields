@@ -89,18 +89,21 @@ class Form extends React.Component {
   }
 
   render() {
+    const SubmitComponent = this.props.submitComponent
+    const Submit = (
+      <SubmitComponent
+        {...this.props.submitComponentProps}
+        onClick={::this.submit}
+      />
+    )
+
     const options = {
       onChange: ::this.onChange,
       fields: this.props.fields,
       showLabels: this.props.showLabels,
       fieldComponents: this.props.fieldComponents,
       errors: this.state.errors && this.state.errors.fieldErrors,
-      fieldsContext: {
-        Submit: React.cloneElement(this.props.submitComponent, {
-          ...this.props.submitComponentProps,
-          onClick: ::this.submit
-        })
-      }
+      fieldsContext: { Submit }
     }
 
     return (
