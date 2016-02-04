@@ -102,7 +102,9 @@ class Form extends React.Component {
       />
     )
 
+    // Allow some props to pass down to `renderFields`.
     const options = {
+      value: this.props.value,
       onChange: ::this.onChange,
       fields: this.props.fields,
       showLabels: this.props.showLabels,
