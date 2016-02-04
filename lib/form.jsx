@@ -54,29 +54,23 @@ class Form extends React.Component {
 
     this.setState({ errors: null })
 
+    // Perform client-side validation
     const fieldErrors = await this.props.validate(this.props.schema, values)
     if (!_.isEmpty(fieldErrors)) {
       this.setState({ errors: { fieldErrors } })
       return
     }
 
-    // validate
-    let errors
+    let res
     try {
-      errors = await this.props.submit(values)
-    } catch (err) {
-      this.setState({
-        errors: {
-          summaryError: 'There was an error submitting the form'
-        }
-      })
+      res = await this.props.submit(values)
+    } catch (errors) {
+      this.setState({ errors })
       return
     }
 
-    this.setState({ errors })
-
     if (this.props.afterSubmit) {
-      this.props.afterSubmit(values)
+      await this.props.afterSubmit(values, res)
     }
   }
 
