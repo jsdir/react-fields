@@ -74,14 +74,27 @@ class Fields extends React.Component {
   }
 
   changeField(fieldName, value) {
-    const values = { ...this.state.values, [fieldName]: value }
+    const values = fieldName ? { ...this.state.values, [fieldName]: value } : value
     this.setState({ values })
     if (this.props.onChange) {
       this.props.onChange(values, fieldName, value)
     }
   }
 
-  renderField(fieldName) {
+  renderField(fieldName, CustomComponent) {
+    const { schema, errors } = this.props
+
+    if (!fieldName && CustomComponent) {
+      return (
+        <CustomComponent
+          {...{ schema }}
+          fieldError={errors}
+          value={this.state.values}
+          onChange={value => this.changeField(fieldName, value)}
+        />
+      )
+    }
+
     const fieldSchema = this.props.schema[fieldName]
     invariant(
       !!fieldSchema,
@@ -89,7 +102,8 @@ class Fields extends React.Component {
         + `is not defined in the schema.`
     )
 
-    const FieldComponent = fieldSchema.component
+    const FieldComponent = CustomComponent
+      || fieldSchema.component
       || this.props.fieldComponents[fieldSchema.type]
 
     invariant(
@@ -107,6 +121,8 @@ class Fields extends React.Component {
       <div key={fieldName}>
         {error}
         <FieldComponent
+          {...{ schema }}
+          fieldError={errorMessage}
           value={this.state.values[fieldName]}
           onChange={value => this.changeField(fieldName, value)}
           {...fieldSchema.fieldComponentProps}
