@@ -28,13 +28,13 @@ class Fields extends React.Component {
      */
     value: PropTypes.object,
     /**
-     * onChange(values, fieldName, fieldValue)
+     * onChange(value, fieldName, fieldValue)
      */
     onChange: PropTypes.func,
     /**
-     * A hash of field name to error message
+     * The field error
      */
-    errors: PropTypes.object,
+    error: PropTypes.any,
     /**
      * If true, renders the values without the field component
      */
@@ -63,53 +63,81 @@ class Fields extends React.Component {
   constructor(props) {
     super(...arguments)
     this.state = {
-      values: props.value || {}
+      value: props.value || {}
     }
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.value) {
-      this.setState({ values: nextProps.value })
+      this.setState({ value: nextProps.value })
     }
   }
 
-  changeField(fieldName, value) {
-    const values = { ...this.state.values, [fieldName]: value }
-    this.setState({ values })
+  changeField(fieldPath, fieldValue, fieldPathString) {
+    // TODO: replace with an immutable version of `_.set`
+    // https://github.com/lodash/lodash/issues/1696
+    const value = _.set(this.state.value, fieldPath, fieldValue)
+    this.setState({ value })
     if (this.props.onChange) {
-      this.props.onChange(values, fieldName, value)
+      this.props.onChange(value, fieldPathString, fieldValue, fieldPath)
     }
   }
 
-  renderField(fieldName) {
-    const fieldSchema = this.props.schema[fieldName]
+  renderFieldWithProps(fieldPath, props) {
+    return this.renderField(fieldPath, props)
+  }
+
+  renderFieldWithComponent(fieldPath, Component, props) {
+    return this.renderField(fieldPath, props, Component)
+  }
+
+  renderField(fieldPath, fieldProps, fieldComponent) {
+    let fieldPathString = null
+    if (_.isString(fieldPath)) {
+      fieldPathString = fieldPath
+      fieldPath = fieldPath.split('.')
+    }
+
+    const fieldSchema = fieldPath
+      ? _.get(this.props.schema, fieldPath)
+      : this.props.schema
+
     invariant(
       !!fieldSchema,
-      `render('${fieldName}') failed because the field "${fieldName}" `
+      `render('${fieldPathString}') failed because the field "${fieldPathString}" `
         + `is not defined in the schema.`
     )
 
-    const FieldComponent = fieldSchema.component
+    const FieldComponent = fieldComponent
+      || fieldSchema.fieldComponent
       || this.props.fieldComponents[fieldSchema.type]
 
     invariant(
       FieldComponent,
-      `field "${fieldName}" has a type "${fieldSchema.type}" that does not `
+      `field "${fieldPathString}" has a type "${fieldSchema.type}" that does not `
         + `have a component`
     )
 
-    const errorMessage = (this.props.errors || {})[fieldName]
+    const errorMessage = fieldPath
+      ? _.get(this.props.error, fieldPath)
+      : this.props.error
+
     const error = errorMessage ? (
       <span className="Field-error">{errorMessage}</span>
     ) : null
 
+    const fieldValue = fieldPath
+      ? _.get(this.state.value, fieldPath)
+      : this.state.value
+
     return (
-      <div key={fieldName}>
+      <div key={fieldPathString}>
         {error}
         <FieldComponent
-          value={this.state.values[fieldName]}
-          onChange={value => this.changeField(fieldName, value)}
+          value={fieldValue}
+          onChange={fieldValue => this.changeField(fieldPath, fieldValue, fieldPathString)}
           {...fieldSchema.fieldComponentProps}
+          {...fieldProps}
           // TODO: merge onChange
         />
       </div>
@@ -134,7 +162,8 @@ class Fields extends React.Component {
 
   render() {
     return (this.props.render || ::this.renderAllFields)({
-      render: ::this.renderField,
+      render: ::this.renderFieldWithProps,
+      renderComponent: ::this.renderFieldWithComponent,
       ...this.props.fieldsContext
     })
   }

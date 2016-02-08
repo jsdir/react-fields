@@ -7,6 +7,10 @@ export default
 class Form extends React.Component {
 
   static propTypes = {
+    value: PropTypes.oneOfType([
+      PropTypes.array,
+      PropTypes.object
+    ]),
     validate: PropTypes.func.isRequired,
     /**
      * returns:
@@ -27,8 +31,6 @@ class Form extends React.Component {
      * button types and text will change, you can specify a different
      * type of button for the form.
      */
-    buttonTitle: PropTypes.string,
-
     submitComponent: PropTypes.func.isRequired,
     submitComponentProps: PropTypes.object
   };
@@ -37,46 +39,42 @@ class Form extends React.Component {
     validate
   };
 
-  constructor() {
+  constructor(props) {
     super(...arguments)
     this.state = {
-      values: {},
-      errors: null
+      value: props.value,
+      submitError: null
     }
   }
 
-  onChange(values, fieldName, value) {
-    this.setState({ values })
-  }
-
   async submit() {
-    const { values } = this.state
+    const { value } = this.state
 
-    this.setState({ errors: null })
+    this.setState({ submitError: null })
 
     // Perform client-side validation
-    const fieldErrors = await this.props.validate(this.props.schema, values)
+    const fieldErrors = await this.props.validate(this.props.schema, value)
     if (!_.isEmpty(fieldErrors)) {
-      this.setState({ errors: { fieldErrors } })
+      this.setState({ submitError: { fieldErrors } })
       return
     }
 
     let res
     try {
-      res = await this.props.submit(values)
-    } catch (errors) {
-      this.setState({ errors })
+      res = await this.props.submit(value)
+    } catch (submitError) {
+      this.setState({ submitError })
       return
     }
 
     if (this.props.afterSubmit) {
-      await this.props.afterSubmit(values, res)
+      await this.props.afterSubmit(value, res)
     }
   }
 
   renderError() {
-    const error = this.state.errors
-      && this.state.errors.summaryError
+    const error = this.state.submitError
+      && this.state.submitError.summaryError
     return error ? (
       <div className="Form-error">{error}</div>
     ) : null
@@ -104,12 +102,13 @@ class Form extends React.Component {
 
     // Allow some props to pass down to `renderFields`.
     const options = {
-      value: this.props.value,
-      onChange: ::this.onChange,
+      value: this.state.value,
+      onChange: value => this.setState({ value }),
       fields: this.props.fields,
       showLabels: this.props.showLabels,
       fieldComponents: this.props.fieldComponents,
-      errors: this.state.errors && this.state.errors.fieldErrors,
+      error: this.state.submitError
+        && this.state.submitError.fieldErrors,
       fieldsContext: {
         renderSubmit: ::this.renderSubmit,
         submit: ::this.submit
