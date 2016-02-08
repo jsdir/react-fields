@@ -106,7 +106,7 @@ class Form extends React.Component {
       onChange: value => this.setState({ value }),
       fields: this.props.fields,
       showLabels: this.props.showLabels,
-      fieldComponents: this.props.fieldComponents,
+      fieldTypes: this.props.fieldTypes,
       error: this.state.submitError
         && this.state.submitError.fieldErrors,
       fieldsContext: {

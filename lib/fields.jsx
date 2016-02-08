@@ -47,7 +47,12 @@ class Fields extends React.Component {
      * A hash of field type to component. These can be replaced with
      * field-level declarations as well.
      */
-    fieldComponents: PropTypes.object,
+    fieldTypes: PropTypes.objectOf(
+      PropTypes.shape({
+        fieldComponent: PropTypes.func,
+        fieldComponentProps: PropTypes.object
+      })
+    ),
     /**
      * An array of fields to display. If this is not specificed, all
      * fields will be displayed.
@@ -108,9 +113,12 @@ class Fields extends React.Component {
         + `is not defined in the schema.`
     )
 
+    const fieldType = this.props.fieldTypes
+      && this.props.fieldTypes[fieldSchema.type]
+
     const FieldComponent = fieldComponent
       || fieldSchema.fieldComponent
-      || this.props.fieldComponents[fieldSchema.type]
+      || (fieldType && fieldType.fieldComponent)
 
     invariant(
       FieldComponent,
@@ -137,6 +145,7 @@ class Fields extends React.Component {
           value={fieldValue}
           onChange={fieldValue => this.changeField(fieldPath, fieldValue, fieldPathString)}
           {...fieldSchema.fieldComponentProps}
+          {...(fieldType && fieldType.fieldComponentProps)}
           {...fieldProps}
           // TODO: merge onChange
         />
@@ -180,9 +189,13 @@ export const createFieldRenderer = (baseOptions) => {
   return (schema, options, renderFunc) => (
     renderFields(
       schema, {
-        fieldComponents: {
-          string: TextInput,
-          number: NumberInput
+        fieldTypes: {
+          string: {
+            fieldComponent: TextInput
+          },
+          number: {
+            fieldComponent: NumberInput
+          }
         },
         ...baseOptions,
         ...options
