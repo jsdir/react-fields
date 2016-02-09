@@ -19,7 +19,8 @@ class Fields extends React.Component {
         type: PropTypes.string.isRequired,
         rules: PropTypes.object,
         fieldComponent: PropTypes.func,
-        fieldComponentProps: PropTypes.object
+        fieldComponentProps: PropTypes.object,
+        item: PropTypes.object
       })
     ).isRequired,
     render: PropTypes.func,
@@ -79,10 +80,10 @@ class Fields extends React.Component {
   }
 
   changeField(fieldPath, fieldValue, fieldPathString) {
-    // TODO: replace with an immutable version of `_.set`
+    // TODO: replace with immutable `_.set`
     // https://github.com/lodash/lodash/issues/1696
     const value = fieldPath
-      ? _.set(this.state.value, fieldPath, fieldValue)
+      ? _.set(Object.assign({}, this.state.value), fieldPath, fieldValue)
       : fieldValue
 
     this.setState({ value })
@@ -119,7 +120,7 @@ class Fields extends React.Component {
     )
 
     // Get the error message.
-    const errorMessage = fieldPath
+    const fieldError = fieldPath
       ? _.get(this.props.error, fieldPath)
       : this.props.error
 
@@ -132,7 +133,7 @@ class Fields extends React.Component {
       fieldPath,
       fieldPathString,
       fieldSchema,
-      errorMessage,
+      fieldError,
       value,
       onChange: fieldValue => (
         this.changeField(fieldPath, fieldValue, fieldPathString)
@@ -145,7 +146,7 @@ class Fields extends React.Component {
     return {
       value: fieldData.value,
       onChange: fieldData.onChange,
-      error: fieldData.errorMessage
+      error: fieldData.fieldError
     }
   }
 
@@ -154,7 +155,7 @@ class Fields extends React.Component {
       fieldPath,
       fieldPathString,
       fieldSchema,
-      errorMessage,
+      fieldError,
       value,
       onChange
     } = this.getFieldData(rawFieldPath)
@@ -172,16 +173,18 @@ class Fields extends React.Component {
         + `have a component`
     )
 
-    const error = errorMessage ? (
-      <span className="Field-error">{errorMessage}</span>
+    const errorMessage = fieldError ? (
+      <span className="Field-error">{fieldError}</span>
     ) : null
 
     return (
       <div key={fieldPathString}>
-        {error}
+        {errorMessage}
         <FieldComponent
           value={value}
           onChange={onChange}
+          error={fieldError}
+          schema={fieldSchema}
           {...fieldSchema.fieldComponentProps}
           {...(fieldType && fieldType.fieldComponentProps)}
           {...fieldProps}
