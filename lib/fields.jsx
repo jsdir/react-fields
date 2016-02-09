@@ -215,6 +215,7 @@ class Fields extends React.Component {
       render: ::this.renderFieldWithProps,
       renderComponent: ::this.renderFieldWithComponent,
       propsFor: ::this.propsFor,
+      value: this.state.value,
       ...this.props.fieldsContext
     })
   }
@@ -228,20 +229,9 @@ class Fields extends React.Component {
  * @param {?Object} baseOptions - base options for `renderFields`
  */
 export const createFieldRenderer = (baseOptions) => {
-  return (schema, options, renderFunc) => (
+  return (schema, options, render) => (
     renderFields(
-      schema, {
-        fieldTypes: {
-          string: {
-            fieldComponent: TextInput
-          },
-          number: {
-            fieldComponent: NumberInput
-          }
-        },
-        ...baseOptions,
-        ...options
-      }, renderFunc
+      schema, { ...baseOptions, ...options }, render
     )
   )
 }
@@ -255,9 +245,13 @@ export const createFieldRenderer = (baseOptions) => {
  */
 export const renderFields = (schema, options, render) => {
   options = {
-    fieldComponents: {
-      string: TextInput,
-      number: NumberInput
+    fieldTypes: {
+      string: {
+        fieldComponent: TextInput
+      },
+      number: {
+        fieldComponent: NumberInput
+      }
     },
     ..._.pickBy(options, v => v)
   }
