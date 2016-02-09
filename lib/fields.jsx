@@ -66,27 +66,15 @@ class Fields extends React.Component {
     fieldComponents: {}
   };
 
-  constructor(props) {
-    super(...arguments)
-    this.state = {
-      value: props.value || {}
-    }
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.value) {
-      this.setState({ value: nextProps.value })
-    }
-  }
-
   changeField(fieldPath, fieldValue, fieldPathString) {
     // TODO: replace with immutable `_.set`
     // https://github.com/lodash/lodash/issues/1696
-    const value = fieldPath
-      ? _.set(Object.assign({}, this.state.value), fieldPath, fieldValue)
-      : fieldValue
+    const value = fieldPath ? _.set(
+      Object.assign({}, this.props.value),
+      fieldPath,
+      fieldValue
+    ) : fieldValue
 
-    this.setState({ value })
     if (this.props.onChange) {
       this.props.onChange(value, fieldPathString, fieldValue, fieldPath)
     }
@@ -126,8 +114,8 @@ class Fields extends React.Component {
 
     // Get the field value.
     const value = fieldPath
-      ? _.get(this.state.value, fieldPath)
-      : this.state.value
+      ? _.get(this.props.value, fieldPath)
+      : this.props.value
 
     return {
       fieldPath,
@@ -215,7 +203,7 @@ class Fields extends React.Component {
       render: ::this.renderFieldWithProps,
       renderComponent: ::this.renderFieldWithComponent,
       propsFor: ::this.propsFor,
-      value: this.state.value,
+      value: this.props.value,
       ...this.props.fieldsContext
     })
   }
