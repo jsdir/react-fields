@@ -16,11 +16,10 @@ class Fields extends React.Component {
     schema: PropTypes.objectOf(
       PropTypes.shape({
         title: PropTypes.string,
-        type: PropTypes.string.isRequired,
+        type: PropTypes.string,
         rules: PropTypes.object,
         fieldComponent: PropTypes.func,
-        fieldComponentProps: PropTypes.object,
-        item: PropTypes.object
+        fieldComponentProps: PropTypes.object
       })
     ).isRequired,
     render: PropTypes.func,
@@ -136,7 +135,7 @@ class Fields extends React.Component {
   }
 
   getPropsForFieldData(fieldData) {
-    const { fieldSchema, fieldType  } = fieldData
+    const { fieldSchema, fieldType } = fieldData
 
     return {
       value: fieldData.value,
