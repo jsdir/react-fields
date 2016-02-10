@@ -174,14 +174,18 @@ class Fields extends React.Component {
         + `have a component`
     )
 
+    /*
     const errorMessage = fieldError ? (
       <span className="Field-error">{fieldError}</span>
     ) : null
+    */
+    // TODO: decide if errors should be shown by default
+    const errorMessage = null
 
+    // TODO: merge fieldProps.onChange with props.onChange
     return (
       <div key={fieldPathString}>
         {errorMessage}
-        // TODO: merge fieldProps.onChange with props.onChange
         <FieldComponent {...props} {...fieldProps}/>
       </div>
     )
