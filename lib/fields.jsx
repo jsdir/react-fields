@@ -59,7 +59,8 @@ class Fields extends React.Component {
      * fields will be displayed.
      */
     fields: PropTypes.array,
-    fieldsContext: PropTypes.object
+    fieldsContext: PropTypes.object,
+    fieldComponentProps: PropTypes.object
   };
 
   static defaultProps = {
@@ -117,11 +118,16 @@ class Fields extends React.Component {
       ? _.get(this.props.value, fieldPath)
       : this.props.value
 
+    // Get the field type options.
+    const fieldType = this.props.fieldTypes
+      && this.props.fieldTypes[fieldSchema.type]
+
     return {
       fieldPath,
       fieldPathString,
       fieldSchema,
       fieldError,
+      fieldType,
       value,
       onChange: fieldValue => (
         this.changeField(fieldPath, fieldValue, fieldPathString)
@@ -129,27 +135,34 @@ class Fields extends React.Component {
     }
   }
 
-  propsFor(fieldPath) {
-    const fieldData = this.getFieldData(fieldPath)
+  getPropsForFieldData(fieldData) {
+    const { fieldSchema, fieldType  } = fieldData
+
     return {
       value: fieldData.value,
       onChange: fieldData.onChange,
-      error: fieldData.fieldError
+      error: fieldData.fieldError,
+      schema: fieldData.fieldSchema,
+      ...this.props.fieldComponentProps,
+      ...fieldSchema.fieldComponentProps,
+      ...(fieldType && fieldType.fieldComponentProps)
     }
   }
 
-  renderField(rawFieldPath, fieldProps, fieldComponent) {
-    const {
-      fieldPath,
-      fieldPathString,
-      fieldSchema,
-      fieldError,
-      value,
-      onChange
-    } = this.getFieldData(rawFieldPath)
+  propsFor(fieldPath) {
+    const fieldData = this.getFieldData(fieldPath)
+    return this.getPropsForFieldData(fieldData)
+  }
 
-    const fieldType = this.props.fieldTypes
-      && this.props.fieldTypes[fieldSchema.type]
+  renderField(rawFieldPath, fieldProps, fieldComponent) {
+    const fieldData = this.getFieldData(rawFieldPath)
+    const props = this.getPropsForFieldData(fieldData)
+    const {
+      fieldSchema,
+      fieldType,
+      fieldPathString,
+      fieldError
+    } = fieldData
 
     const FieldComponent = fieldComponent
       || fieldSchema.fieldComponent
@@ -168,16 +181,8 @@ class Fields extends React.Component {
     return (
       <div key={fieldPathString}>
         {errorMessage}
-        <FieldComponent
-          value={value}
-          onChange={onChange}
-          error={fieldError}
-          schema={fieldSchema}
-          {...fieldSchema.fieldComponentProps}
-          {...(fieldType && fieldType.fieldComponentProps)}
-          {...fieldProps}
-          // TODO: merge onChange
-        />
+        // TODO: merge fieldProps.onChange with props.onChange
+        <FieldComponent {...props} {...fieldProps}/>
       </div>
     )
   }
