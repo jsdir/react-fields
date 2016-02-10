@@ -112,7 +112,8 @@ class Form extends React.Component {
       fieldsContext: {
         renderSubmit: ::this.renderSubmit,
         submit: ::this.submit
-      }
+      },
+      fieldComponentProps: this.props.fieldComponentProps
     }
 
     return (
