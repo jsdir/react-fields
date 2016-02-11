@@ -63,6 +63,7 @@ class Form extends React.Component {
     try {
       res = await this.props.submit(value)
     } catch (submitError) {
+      console.error(submitError)
       this.setState({ submitError })
       return
     }
@@ -70,6 +71,10 @@ class Form extends React.Component {
     if (this.props.afterSubmit) {
       await this.props.afterSubmit(value, res)
     }
+  }
+
+  reset() {
+    this.setState({ value: this.props.value })
   }
 
   renderError() {
@@ -111,7 +116,8 @@ class Form extends React.Component {
         && this.state.submitError.fieldErrors,
       fieldsContext: {
         renderSubmit: ::this.renderSubmit,
-        submit: ::this.submit
+        submit: ::this.submit,
+        reset: ::this.reset
       },
       fieldComponentProps: this.props.fieldComponentProps
     }
