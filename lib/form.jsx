@@ -10,7 +10,7 @@ class Form extends React.Component {
     value: PropTypes.oneOfType([
       PropTypes.array,
       PropTypes.object
-    ]),
+    ]).isRequired,
     validate: PropTypes.func.isRequired,
     /**
      * returns:
@@ -36,7 +36,8 @@ class Form extends React.Component {
   };
 
   static defaultProps = {
-    validate
+    validate,
+    value: {}
   };
 
   constructor(props) {

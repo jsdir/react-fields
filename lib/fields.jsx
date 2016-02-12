@@ -7,26 +7,31 @@ import titleize from 'titleize'
 import TextInput from './components/TextInput'
 import NumberInput from './components/NumberInput'
 
+const schemaPropType = PropTypes.objectOf(
+  PropTypes.oneOfType([
+    PropTypes.shape({
+      title: PropTypes.string,
+      type: PropTypes.string,
+      rules: PropTypes.object,
+      fieldComponent: PropTypes.func,
+      fieldComponentProps: PropTypes.object
+    }),
+    schemaPropType
+  ])
+)
+
 class Fields extends React.Component {
 
   static propTypes = {
     /**
      * The field schema
      */
-    schema: PropTypes.objectOf(
-      PropTypes.shape({
-        title: PropTypes.string,
-        type: PropTypes.string,
-        rules: PropTypes.object,
-        fieldComponent: PropTypes.func,
-        fieldComponentProps: PropTypes.object
-      })
-    ).isRequired,
+    schema: schemaPropType.isRequired,
     render: PropTypes.func,
     /**
      * The field values
      */
-    value: PropTypes.object,
+    value: PropTypes.any.isRequired,
     /**
      * onChange(value, fieldName, fieldValue)
      */
@@ -34,7 +39,7 @@ class Fields extends React.Component {
     /**
      * The field error
      */
-    error: PropTypes.any,
+    error: PropTypes.object,
     /**
      * If true, renders the values without the field component
      */
@@ -63,7 +68,8 @@ class Fields extends React.Component {
   };
 
   static defaultProps = {
-    fieldComponents: {}
+    fieldComponents: {},
+    value: {}
   };
 
   changeField(fieldPath, fieldValue, fieldPathString) {
@@ -142,6 +148,7 @@ class Fields extends React.Component {
       onChange: fieldData.onChange,
       error: fieldData.fieldError,
       schema: fieldData.fieldSchema,
+      required: _.get(fieldData.fieldSchema, ['rules', 'required']),
       ...this.props.fieldComponentProps,
       ...fieldSchema.fieldComponentProps,
       ...(fieldType && fieldType.fieldComponentProps)
