@@ -3,22 +3,37 @@ import React, { PropTypes } from 'react'
 import invariant from 'invariant'
 import titleize from 'titleize'
 
+import { normalizeSchema } from './utils'
+
 // Default field components
 import TextInput from './components/TextInput'
 import NumberInput from './components/NumberInput'
 
-const schemaPropType = PropTypes.objectOf(
-  PropTypes.oneOfType([
-    PropTypes.shape({
-      title: PropTypes.string,
-      type: PropTypes.string,
-      rules: PropTypes.object,
-      fieldComponent: PropTypes.func,
-      fieldComponentProps: PropTypes.object
-    }),
-    schemaPropType
-  ])
-)
+const schemaPropType = PropTypes.oneOfType([
+  PropTypes.shape({
+    title: PropTypes.string,
+    type: PropTypes.oneOf([
+      'array', 'object', 'string', 'integer', 'date', 'datetime'
+    ]),
+    rules: PropTypes.object,
+    fieldComponent: PropTypes.func,
+    fieldComponentProps: PropTypes.object,
+    schema: PropTypes.oneOfType([
+      () => schemaPropType(...arguments),
+      PropTypes.objectOf(() => schemaPropType(...arguments))
+    ])
+  }),
+  PropTypes.objectOf(() => schemaPropType(...arguments))
+])
+
+const errorPropType = PropTypes.oneOfType([
+  PropTypes.string,
+  PropTypes.shape({
+    error: () => errorPropType(...arguments),
+    fieldErrors: PropTypes.objectOf(() => errorPropType(...arguments)),
+    itemErrors: PropTypes.objectOf(() => errorPropType(...arguments))
+  })
+])
 
 class Fields extends React.Component {
 
@@ -27,11 +42,14 @@ class Fields extends React.Component {
      * The field schema
      */
     schema: schemaPropType.isRequired,
-    render: PropTypes.func,
+    render: PropTypes.func.isRequired,
     /**
      * The field values
      */
-    value: PropTypes.any.isRequired,
+    value: PropTypes.oneOfType([
+      PropTypes.array,
+      PropTypes.object
+    ]).isRequired,
     /**
      * onChange(value, fieldName, fieldValue)
      */
@@ -39,7 +57,7 @@ class Fields extends React.Component {
     /**
      * The field error
      */
-    error: PropTypes.object,
+    error: errorPropType,
     /**
      * If true, renders the values without the field component
      */
@@ -72,7 +90,22 @@ class Fields extends React.Component {
     value: {}
   };
 
+  constructor(props) {
+    super(...arguments)
+    this.loadProps(props)
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.loadProps(nextProps)
+  }
+
+  loadProps(props) {
+    this.schema = normalizeSchema(props.schema)
+  }
+
   changeField(fieldPath, fieldValue, fieldPathString) {
+    this.checkFieldPath(fieldPath)
+
     // TODO: replace with immutable `_.set`
     // https://github.com/lodash/lodash/issues/1696
     const value = fieldPath ? _.set(
@@ -94,6 +127,13 @@ class Fields extends React.Component {
     return this.renderField(fieldPath, props, Component)
   }
 
+  checkFieldPath(fieldPath) {
+    invariant(
+      !(fieldPath && this.schema.type !== 'object'),
+      `Only object types support named fields.`
+    )
+  }
+
   getFieldData(fieldPath) {
     // Normalize the field path.
     let fieldPathString = null
@@ -102,20 +142,21 @@ class Fields extends React.Component {
       fieldPath = fieldPath.split('.')
     }
 
-    // Get and check the field schema.
+    this.checkFieldPath(fieldPath)
+
     const fieldSchema = fieldPath
-      ? _.get(this.props.schema, fieldPath)
-      : this.props.schema
+      ? _.get(this.schema, _.flatMap(fieldPath, p => ['schema', p]))
+      : this.schema
 
     invariant(
       !!fieldSchema,
-      `render('${fieldPathString}') failed because the field "${fieldPathString}" `
-        + `is not defined in the schema.`
+      `render('${fieldPathString}') failed because the field `
+        + `"${fieldPathString}" is not defined in the schema.`
     )
 
     // Get the error message.
     const fieldError = fieldPath
-      ? _.get(this.props.error, fieldPath)
+      ? _.get(this.props.error, _.flatMap(fieldPath, p => ['fieldErrors', p]))
       : this.props.error
 
     // Get the field value.
@@ -197,24 +238,8 @@ class Fields extends React.Component {
     )
   }
 
-  // Renders the fields based on the schema with labels.
-  renderAllFields() {
-    const fieldNames = _.keys(this.props.schema)
-    const sortedFieldNames = this.props.fields || _.sortBy(fieldNames)
-    const items = _.map(sortedFieldNames, fieldName => (
-      <div key={fieldName}>
-        <label>
-          {this.props.schema[fieldName].title || titleize(fieldName)}
-        </label>
-        {this.renderField(fieldName)}
-      </div>
-    ))
-
-    return (<div>{items}</div>)
-  }
-
   render() {
-    return (this.props.render || ::this.renderAllFields)({
+    return this.props.render({
       render: ::this.renderFieldWithProps,
       renderComponent: ::this.renderFieldWithComponent,
       propsFor: ::this.propsFor,

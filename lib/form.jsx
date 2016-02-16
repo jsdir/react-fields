@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react'
 
+import { normalizeSchema } from './utils'
 import { renderFields } from './fields'
 import { validate } from './validate'
 
@@ -7,10 +8,7 @@ export default
 class Form extends React.Component {
 
   static propTypes = {
-    value: PropTypes.oneOfType([
-      PropTypes.array,
-      PropTypes.object
-    ]).isRequired,
+    value: PropTypes.any,
     validate: PropTypes.func.isRequired,
     /**
      * returns:
@@ -42,10 +40,19 @@ class Form extends React.Component {
 
   constructor(props) {
     super(...arguments)
+    this.loadProps(props)
     this.state = {
       value: props.value,
       submitError: null
     }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.loadProps(nextProps)
+  }
+
+  loadProps(props) {
+    this.schema = normalizeSchema(props.schema)
   }
 
   async submit() {
@@ -54,10 +61,10 @@ class Form extends React.Component {
     this.setState({ submitError: null })
 
     // Perform client-side validation
-    const fieldErrors = await this.props.validate(this.props.schema, value)
-    if (!_.isEmpty(fieldErrors)) {
-      this.setState({ submitError: { fieldErrors } })
-      return
+    const submitError = await this.props.validate(this.schema, value)
+    if (submitError) {
+      this.setState({ submitError })
+      return false
     }
 
     let res
@@ -66,7 +73,7 @@ class Form extends React.Component {
     } catch (submitError) {
       console.error(submitError)
       this.setState({ submitError })
-      return
+      return false
     }
 
     if (this.props.afterSubmit) {
@@ -114,7 +121,7 @@ class Form extends React.Component {
       showLabels: this.props.showLabels,
       fieldTypes: this.props.fieldTypes,
       error: this.state.submitError
-        && this.state.submitError.fieldErrors,
+        && this.state.submitError.error,
       fieldsContext: {
         renderSubmit: ::this.renderSubmit,
         submit: ::this.submit,
