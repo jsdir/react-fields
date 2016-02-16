@@ -21,12 +21,18 @@ class Form extends React.Component {
      * type of button for the form.
      */
     submitComponent: PropTypes.func.isRequired,
-    submitComponentProps: PropTypes.object
+    submitComponentProps: PropTypes.object,
+    showFormError: PropTypes.bool,
+    renderFormError: PropTypes.func
   };
 
   static defaultProps = {
     validate,
-    value: {}
+    value: {},
+    showFormError: true,
+    renderFormError: message => (
+      <div className="Form-error">{message}</div>
+    )
   };
 
   constructor(props) {
@@ -62,7 +68,6 @@ class Form extends React.Component {
     try {
       res = await this.props.submit(value)
     } catch (submitError) {
-      console.error(submitError)
       this.setState({ submitError })
       return false
     }
@@ -80,12 +85,12 @@ class Form extends React.Component {
     this.setState({ submitError: null })
   }
 
-  renderError() {
-    const error = this.state.submitError
-      && this.state.submitError.summaryError
-    return error ? (
-      <div className="Form-error">{error}</div>
-    ) : null
+  renderFormError() {
+    const message = this.state.submitError
+      && this.state.submitError.formError
+    return message
+      ? this.props.renderFormError(message)
+      : null
   }
 
   renderSubmit(props) {
@@ -118,6 +123,7 @@ class Form extends React.Component {
       error: this.state.submitError
         && this.state.submitError.error,
       fieldsContext: {
+        renderFormError: ::this.renderFormError,
         renderSubmit: ::this.renderSubmit,
         submit: ::this.submit,
         reset: ::this.reset
@@ -130,7 +136,7 @@ class Form extends React.Component {
 
     return (
       <div className="Form">
-        {this.renderError()}
+        {this.props.showFormError ? this.renderFormError() : null}
         {renderFields(this.props.schema, options, this.props.render)}
       </div>
     )
