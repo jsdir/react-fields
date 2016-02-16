@@ -68,6 +68,7 @@ class Form extends React.Component {
     try {
       res = await this.props.submit(value)
     } catch (submitError) {
+      console.error(submitError)
       this.setState({ submitError })
       return false
     }
