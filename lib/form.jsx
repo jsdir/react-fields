@@ -54,8 +54,7 @@ class Form extends React.Component {
     // Perform client-side validation
     const submitError = await this.props.validate(this.schema, value)
     if (submitError) {
-      // this.setState({ submitError })
-      this.setState({ submitError: { error: submitError } })
+      this.setState({ submitError })
       return false
     }
 
