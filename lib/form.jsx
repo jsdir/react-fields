@@ -10,15 +10,6 @@ class Form extends React.Component {
   static propTypes = {
     value: PropTypes.any,
     validate: PropTypes.func.isRequired,
-    /**
-     * returns:
-     * {
-     *   "summaryError": "Summary error message",
-     *   "fieldErrors": {
-     *     "field_name": "Field error message"
-     *   }
-     * }
-     */
     submit: PropTypes.func.isRequired,
     /**
      * Called only after `submit` returns a falsy value.
@@ -58,12 +49,13 @@ class Form extends React.Component {
   async submit() {
     const { value } = this.state
 
-    this.setState({ submitError: null })
+    this.clearError()
 
     // Perform client-side validation
     const submitError = await this.props.validate(this.schema, value)
     if (submitError) {
-      this.setState({ submitError })
+      // this.setState({ submitError })
+      this.setState({ submitError: { error: submitError } })
       return false
     }
 
@@ -83,6 +75,10 @@ class Form extends React.Component {
 
   reset() {
     this.setState({ value: this.props.value })
+  }
+
+  clearError() {
+    this.setState({ submitError: null })
   }
 
   renderError() {
@@ -127,7 +123,10 @@ class Form extends React.Component {
         submit: ::this.submit,
         reset: ::this.reset
       },
-      fieldComponentProps: this.props.fieldComponentProps
+      fieldComponentProps: {
+        ...this.props.fieldComponentProps,
+        clearError: ::this.clearError
+      }
     }
 
     return (
