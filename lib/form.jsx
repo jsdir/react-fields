@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react'
 
 import { normalizeSchema } from './utils'
 import { renderFields } from './fields'
-import { validate } from './validate'
+import validate from './validate'
 
 export default
 class Form extends React.Component {
