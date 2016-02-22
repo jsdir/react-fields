@@ -153,12 +153,73 @@ describe('validate', () => {
       })
     })
   })
+
+  it('should return custom error messages defined as strings', async () => {
+    const schema = {
+      type: 'object',
+      schema: {
+        foo: {
+          rules: {
+            required: {
+              param: true,
+              errorMessage: 'custom error string'
+            }
+          }
+        }
+      }
+    }
+
+    expect(await validate(schema, {})).toEqual({
+      error: {
+        error: undefined,
+        fieldErrors: {
+          foo: 'custom error string'
+        }
+      },
+      formError: undefined
+    })
+  })
+
+  it('should return custom error messages defined as functions', async () => {
+    let fieldOptions
+    const schema = {
+      type: 'object',
+      schema: {
+        foo: {
+          rules: {
+            maxLength: {
+              param: 1,
+              errorMessage: (options) => {
+                fieldOptions = options
+                return 'custom error function'
+              }
+            }
+          }
+        }
+      }
+    }
+
+    expect(await validate(schema, {foo: 'bar'})).toEqual({
+      error: {
+        error: undefined,
+        fieldErrors: {
+          foo: 'custom error function'
+        }
+      },
+      formError: undefined
+    })
+
+    expect(fieldOptions.value).toEqual('bar')
+    expect(fieldOptions.schema).toEqual(schema.schema.foo)
+    expect(fieldOptions.param).toBe(1)
+    expect(fieldOptions.title).toBe('Foo')
+    expect(fieldOptions.context).toEqual({ foo: 'bar' })
+  })
 })
 
 /*
 TODO:
 
-- custom error message (string and function)
 - lifted formError
 - titles
 - custom errors (sync and async)
