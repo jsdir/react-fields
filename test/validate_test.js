@@ -250,11 +250,44 @@ describe('validate', () => {
       })
     })
   })
+
+  it('should return the first form error raised by a child node', async () => {
+    expect(await validate({
+      type: 'object',
+      schema: {
+        foo_attr: {
+          type: 'string',
+          rules: {
+            required: {
+              param: true,
+              formError: true
+            }
+          }
+        },
+        bar_attr: {
+          type: 'string',
+          rules: {
+            required: true,
+            param: {
+              param: true,
+              formError: true
+            }
+          }
+        }
+      }
+    }, {})).toEqual({
+      formError: 'Foo Attr is required',
+      fieldErrors: {
+        bar_attr: {
+          message: 'Bar Attr is required'
+        }
+      }
+    })
+  })
 })
 
 /*
 TODO:
 
-- lifted formError
 - custom errors (sync and async)
 */
