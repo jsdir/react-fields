@@ -80,6 +80,7 @@ class Form extends React.Component {
 
   reset() {
     this.setState({ value: this.props.value })
+    this.clearError()
   }
 
   clearError() {
