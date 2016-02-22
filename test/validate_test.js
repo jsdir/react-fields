@@ -1,5 +1,6 @@
-import validate, { rules } from '../lib/validate'
 import expect from 'expect'
+
+import validate, { rules } from '../lib/validate'
 
 const testRule = (ruleName, value, param, expectedMessage) => {
   const message = rules[ruleName]({ title: 'value', value, param })
@@ -77,8 +78,7 @@ describe('validate', () => {
 
       expect(await validate(schema, 'foo')).toEqual(null)
       expect(await validate(schema, null)).toEqual({
-        error: 'root string is required',
-        formError: undefined
+        message: 'Root string is required'
       })
     })
   })
@@ -98,10 +98,7 @@ describe('validate', () => {
 
       expect(await validate(schema, ['foo'])).toEqual(null)
       expect(await validate(schema, [])).toEqual({
-        error: {
-          error: 'root array must have at least 1 item'
-        },
-        formError: undefined
+        message: 'Root array must have at least 1 item'
       })
     })
   })
@@ -131,25 +128,26 @@ describe('validate', () => {
       }
 
       expect(await validate(schema, null)).toEqual({
-        error: {
-          error: 'root object is required',
-          fieldErrors: {
-            foo: 'Foo is required',
-            bar: 'Bar is required'
+        message: 'Root object is required',
+        fieldErrors: {
+          foo: {
+            message: 'Foo is required'
+          },
+          bar: {
+            message: 'Bar is required'
           }
-        },
-        formError: undefined
+        }
       })
 
       expect(await validate(schema, {})).toEqual({
-        error: {
-          error: undefined,
-          fieldErrors: {
-            foo: 'Foo is required',
-            bar: 'Bar is required'
+        fieldErrors: {
+          foo: {
+            message: 'Foo is required'
+          },
+          bar: {
+            message: 'Bar is required'
           }
-        },
-        formError: undefined
+        }
       })
     })
   })
@@ -170,13 +168,11 @@ describe('validate', () => {
     }
 
     expect(await validate(schema, {})).toEqual({
-      error: {
-        error: undefined,
-        fieldErrors: {
-          foo: 'custom error string'
+      fieldErrors: {
+        foo: {
+          message: 'custom error string'
         }
-      },
-      formError: undefined
+      }
     })
   })
 
@@ -200,20 +196,18 @@ describe('validate', () => {
     }
 
     expect(await validate(schema, {foo: 'bar'})).toEqual({
-      error: {
-        error: undefined,
-        fieldErrors: {
-          foo: 'custom error function'
+      fieldErrors: {
+        foo: {
+          message: 'custom error function'
         }
-      },
-      formError: undefined
+      }
     })
 
     expect(fieldOptions.value).toEqual('bar')
     expect(fieldOptions.schema).toEqual(schema.schema.foo)
     expect(fieldOptions.param).toBe(1)
     expect(fieldOptions.title).toBe('Foo')
-    expect(fieldOptions.context).toEqual({ foo: 'bar' })
+    expect(fieldOptions.rootValue).toEqual({ foo: 'bar' })
   })
 })
 

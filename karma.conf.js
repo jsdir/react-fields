@@ -14,8 +14,7 @@ module.exports = function(config) {
     reporters: ['progress'],
     webpack: webpackConfig,
     webpackMiddleware: {
-      noInfo: true,
-      quiet: true
+      noInfo: true
     }
   });
 };
