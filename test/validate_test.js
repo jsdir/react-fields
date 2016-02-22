@@ -209,12 +209,52 @@ describe('validate', () => {
     expect(fieldOptions.title).toBe('Foo')
     expect(fieldOptions.rootValue).toEqual({ foo: 'bar' })
   })
+
+  describe('field titles', () => {
+
+    context('when defined with a schema title', () => {
+
+      it('should be the schema title', async () => {
+        expect(await validate({
+          type: 'string',
+          title: 'foo',
+          rules: {
+            required: true
+          }
+        }, null)).toEqual({
+          message: 'foo is required'
+        })
+      })
+    })
+
+    context('when defined without a schema title', () => {
+
+      it('should be the field name', async () => {
+        expect(await validate({
+          type: 'object',
+          schema: {
+            foo_attr: {
+              type: 'string',
+              rules: {
+                required: true
+              }
+            }
+          }
+        }, {})).toEqual({
+          fieldErrors: {
+            foo_attr: {
+              message: 'Foo Attr is required'
+            }
+          }
+        })
+      })
+    })
+  })
 })
 
 /*
 TODO:
 
 - lifted formError
-- titles
 - custom errors (sync and async)
 */
