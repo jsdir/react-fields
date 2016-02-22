@@ -40,7 +40,7 @@ class Form extends React.Component {
     this.loadProps(props)
     this.state = {
       value: props.value,
-      submitError: null
+      error: null
     }
   }
 
@@ -58,18 +58,18 @@ class Form extends React.Component {
     this.clearError()
 
     // Perform client-side validation
-    const submitError = await this.props.validate(this.schema, value)
-    if (submitError) {
-      this.setState({ submitError })
+    const error = await this.props.validate(this.schema, value)
+    if (error) {
+      this.setState({ error })
       return false
     }
 
     let res
     try {
       res = await this.props.submit(value)
-    } catch (submitError) {
-      console.error(submitError)
-      this.setState({ submitError })
+    } catch (error) {
+      console.error(error)
+      this.setState({ error })
       return false
     }
 
@@ -84,14 +84,14 @@ class Form extends React.Component {
   }
 
   clearError() {
-    this.setState({ submitError: null })
+    this.setState({ error: null })
   }
 
   renderFormError() {
-    const message = this.state.submitError
-      && this.state.submitError.formError
-    return message
-      ? this.props.renderFormError(message)
+    const formErrorMessage = this.state.error
+      && this.state.error.formError
+    return formErrorMessage
+      ? this.props.renderFormError(formErrorMessage)
       : null
   }
 
@@ -122,8 +122,7 @@ class Form extends React.Component {
       fields: this.props.fields,
       showLabels: this.props.showLabels,
       fieldTypes: this.props.fieldTypes,
-      error: this.state.submitError
-        && this.state.submitError.error,
+      error: this.state.error,
       fieldsContext: {
         renderFormError: ::this.renderFormError,
         renderSubmit: ::this.renderSubmit,
