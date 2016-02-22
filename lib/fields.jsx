@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import React, { PropTypes } from 'react'
 import invariant from 'invariant'
-import titleize from 'titleize'
 
 import { normalizeSchema } from './utils'
 
