@@ -66,6 +66,22 @@ describe('rules', () => {
 
 describe('validate', () => {
 
+  it('should return null when valid', async () => {
+    expect(await validate({
+      type: 'object',
+      schema: {
+        foo: {
+          type: 'string',
+          rules: {
+            required: true
+          }
+        }
+      }
+    }, {
+      foo: 'bar'
+    })).toEqual(null)
+  })
+
   context('when root is a value', () => {
 
     it('returns the correct value', async () => {
