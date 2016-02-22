@@ -108,7 +108,7 @@ describe('validate', () => {
 
   context('when root is an object', () => {
 
-    it.only('returns the correct value', async () => {
+    it('returns the correct value', async () => {
       const schema = {
         type: 'object',
         rules: {
@@ -134,8 +134,8 @@ describe('validate', () => {
         error: {
           error: 'root object is required',
           fieldErrors: {
-            foo: 'foo is required',
-            bar: 'bar is required'
+            foo: 'Foo is required',
+            bar: 'Bar is required'
           }
         },
         formError: undefined
@@ -145,8 +145,8 @@ describe('validate', () => {
         error: {
           error: undefined,
           fieldErrors: {
-            foo: 'foo is required',
-            bar: 'bar is required'
+            foo: 'Foo is required',
+            bar: 'Bar is required'
           }
         },
         formError: undefined
