@@ -52,7 +52,11 @@ class Form extends React.Component {
     this.schema = normalizeSchema(props.schema)
   }
 
-  async submit() {
+  async submit(event) {
+    if (event) {
+      event.preventDefault()
+    }
+
     const { value } = this.state
 
     this.clearError()
