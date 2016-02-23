@@ -299,6 +299,18 @@ describe('validate', () => {
         }
       }
     })
+
+    expect(await validate({
+      type: 'string',
+      rules: {
+        required: {
+          param: true,
+          formError: true
+        }
+      }
+    }, null)).toEqual({
+      formError: 'Root string is required',
+    })
   })
 
   describe('custom validators', () => {
