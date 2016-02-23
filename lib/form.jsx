@@ -39,6 +39,7 @@ class Form extends React.Component {
     super(...arguments)
     this.loadProps(props)
     this.state = {
+      isSubmitting: false,
       value: props.value,
       error: null
     }
@@ -52,6 +53,10 @@ class Form extends React.Component {
     this.schema = normalizeSchema(props.schema)
   }
 
+  setError(error) {
+    this.setState({ error, isSubmitting: false })
+  }
+
   async submit(event) {
     if (event) {
       event.preventDefault()
@@ -60,11 +65,12 @@ class Form extends React.Component {
     const { value } = this.state
 
     this.clearError()
+    this.setState({ isSubmitting: true })
 
     // Perform client-side validation
     const error = await this.props.validate(this.schema, value)
     if (error) {
-      this.setState({ error })
+      this.setError(error)
       return false
     }
 
@@ -73,13 +79,15 @@ class Form extends React.Component {
       res = await this.props.submit(value)
     } catch (error) {
       console.error(error)
-      this.setState({ error })
+      this.setError(error)
       return false
     }
 
     if (this.props.afterSubmit) {
       await this.props.afterSubmit(value, res)
     }
+
+    this.setState({ isSubmitting: false })
   }
 
   reset() {
@@ -131,6 +139,7 @@ class Form extends React.Component {
         renderFormError: ::this.renderFormError,
         renderSubmit: ::this.renderSubmit,
         submit: ::this.submit,
+        isSubmitting: this.state.isSubmitting,
         reset: ::this.reset
       },
       fieldComponentProps: {
