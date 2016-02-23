@@ -300,10 +300,78 @@ describe('validate', () => {
       }
     })
   })
+
+  describe('custom validators', () => {
+
+    it('should use string param', async () => {
+      let fieldOptions
+
+      const schema = {
+        type: 'object',
+        title: 'foo',
+        rules: {
+          custom: () => {
+            return 'custom error'
+          }
+        },
+        schema: {
+          foo: {
+            type: 'string'
+          }
+        }
+      }
+
+      expect(await validate(schema, {})).toEqual({
+        message: 'custom error'
+      })
+    })
+
+    it('show use function param', async () => {
+      let fieldOptions
+
+      const schema = {
+        type: 'object',
+        title: 'foo',
+        rules: {
+          custom: (options) => {
+            fieldOptions = options
+            return {
+              formError: 'formError',
+              message: 'message',
+              fieldErrors: {
+                foo: {
+                  message: 'foo error'
+                }
+              }
+            }
+          }
+        },
+        schema: {
+          foo: {
+            type: 'string',
+            rules: {
+              required: true
+            }
+          }
+        }
+      }
+
+      expect(await validate(schema, {})).toEqual({
+        formError: 'formError',
+        message: 'message',
+        fieldErrors: {
+          foo: {
+            message: 'foo error'
+          }
+        }
+      })
+
+      expect(fieldOptions.value).toEqual({})
+      expect(fieldOptions.schema).toEqual(schema)
+      expect(fieldOptions.title).toBe('foo')
+      expect(fieldOptions.rootValue).toEqual({})
+    })
+  })
+
+  // TODO: test async validators
 })
-
-/*
-TODO:
-
-- custom errors (sync and async)
-*/
