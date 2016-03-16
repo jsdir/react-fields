@@ -9,6 +9,7 @@ class Form extends React.Component {
 
   static propTypes = {
     value: PropTypes.any,
+    onChange: PropTypes.func,
     validate: PropTypes.func.isRequired,
     submit: PropTypes.func.isRequired,
     /**
@@ -39,14 +40,21 @@ class Form extends React.Component {
     super(...arguments)
     this.loadProps(props)
     this.state = {
-      isSubmitting: false,
       value: props.value,
+      isSubmitting: false,
       error: null
     }
   }
 
   componentWillReceiveProps(nextProps) {
     this.loadProps(nextProps)
+
+    // If the value changed, we know that the component
+    // is controlled, and that `props.value` is not just
+    // the initial value.
+    if (nextProps.value !== this.props.value) {
+      this.setState({ value: nextProps.value })
+    }
   }
 
   loadProps(props) {
@@ -98,6 +106,8 @@ class Form extends React.Component {
     this.setState({ error: null })
   }
 
+  onChange = value => this.setState({ value });
+
   renderFormError() {
     const formErrorMessage = this.state.error
       && this.state.error.formError
@@ -129,7 +139,9 @@ class Form extends React.Component {
     // Allow some props to pass down to `renderFields`.
     const options = {
       value: this.state.value,
-      onChange: value => this.setState({ value }),
+      // If the `onChange` prop is specified, become a controlled
+      // component.
+      onChange: this.props.onChange || this.onChange,
       fields: this.props.fields,
       showLabels: this.props.showLabels,
       fieldTypes: this.props.fieldTypes,
