@@ -25,9 +25,14 @@ const schemaPropType = PropTypes.oneOfType([
   PropTypes.objectOf(() => schemaPropType(...arguments))
 ])
 
+const errorMessagePropType = PropTypes.oneOfType([
+  PropTypes.node,
+  PropTypes.string
+])
+
 const errorPropType = PropTypes.shape({
-  formError: PropTypes.string,
-  message: PropTypes.string,
+  formError: errorMessagePropType,
+  message: errorMessagePropType,
   fieldErrors: PropTypes.objectOf(() => errorPropType(...arguments)),
   itemErrors: PropTypes.objectOf(() => errorPropType(...arguments))
 })
