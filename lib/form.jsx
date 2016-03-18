@@ -144,13 +144,13 @@ class Form extends React.Component {
   }
 }
 
-export const createFormRenderer = (baseOptions) => {
-  return (schema, options, render) => (
+export const createFormRenderer = (baseOptions) => (
+  (schema, options, render) => (
     renderForm(
       schema, { ...baseOptions, ...options }, render
     )
   )
-}
+)
 
 export const renderForm = (schema, options, render) => (
   <Form

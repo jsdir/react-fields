@@ -8,6 +8,11 @@ import { normalizeSchema } from './utils'
 import TextInput from './components/TextInput'
 import NumberInput from './components/NumberInput'
 
+const defaultFieldTypes = {
+  string: { fieldComponent: TextInput },
+  number: { fieldComponent: NumberInput }
+}
+
 const schemaPropType = PropTypes.oneOfType([
   PropTypes.shape({
     title: PropTypes.string,
@@ -33,8 +38,7 @@ const errorMessagePropType = PropTypes.oneOfType([
 const errorPropType = PropTypes.shape({
   formError: errorMessagePropType,
   message: errorMessagePropType,
-  fieldErrors: PropTypes.objectOf(() => errorPropType(...arguments)),
-  itemErrors: PropTypes.objectOf(() => errorPropType(...arguments))
+  childErrors: PropTypes.objectOf(() => errorPropType(...arguments))
 })
 
 class Fields extends React.Component {
@@ -258,13 +262,13 @@ class Fields extends React.Component {
  *
  * @param {?Object} baseOptions - base options for `renderFields`
  */
-export const createFieldRenderer = (baseOptions) => {
-  return (schema, options, render) => (
+export const createFieldRenderer = (baseOptions) => (
+  (schema, options, render) => (
     renderFields(
       schema, { ...baseOptions, ...options }, render
     )
   )
-}
+)
 
 /**
  * A helper for rendering the `Fields` component.
@@ -273,24 +277,11 @@ export const createFieldRenderer = (baseOptions) => {
  * @param {?Object} options - `props`
  * @param {?Function} render - `props.render`
  */
-export const renderFields = (schema, options, render) => {
-  options = {
-    fieldTypes: {
-      string: {
-        fieldComponent: TextInput
-      },
-      number: {
-        fieldComponent: NumberInput
-      }
-    },
-    ..._.pickBy(options, v => v)
-  }
-
-  return (
-    <Fields
-      schema={schema}
-      render={render}
-      {...options}
-    />
-  )
-}
+export const renderFields = (schema, options, render) => (
+  <Fields
+    schema={schema}
+    render={render}
+    fieldTypes={defaultFieldTypes}
+    {...options}
+  />
+)
