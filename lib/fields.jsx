@@ -83,7 +83,7 @@ class Fields extends React.Component {
      * fields will be displayed.
      */
     fields: PropTypes.array,
-    fieldsContext: PropTypes.object,
+    renderContext: PropTypes.object,
     fieldComponentProps: PropTypes.object
   };
 
@@ -246,7 +246,7 @@ class Fields extends React.Component {
       renderComponent: ::this.renderFieldWithComponent,
       propsFor: ::this.propsFor,
       value: this.props.value,
-      ...this.props.fieldsContext
+      ...this.props.renderContext
     })
   }
 }

@@ -21,8 +21,6 @@ class Form extends React.Component {
      * button types and text will change, you can specify a different
      * type of button for the form.
      */
-    submitComponent: PropTypes.func.isRequired,
-    submitComponentProps: PropTypes.object,
     showFormError: PropTypes.bool,
     renderFormError: PropTypes.func
   };
@@ -116,26 +114,7 @@ class Form extends React.Component {
       : null
   }
 
-  renderSubmit(props) {
-    const Submit = this.props.submitComponent
-    return (
-      <Submit
-        {...this.props.submitComponentProps}
-        {...props}
-        onClick={::this.submit}
-      />
-    )
-  }
-
   render() {
-    const SubmitComponent = this.props.submitComponent
-    const Submit = (
-      <SubmitComponent
-        {...this.props.submitComponentProps}
-        onClick={::this.submit}
-      />
-    )
-
     // Allow some props to pass down to `renderFields`.
     const options = {
       value: this.state.value,
@@ -146,17 +125,14 @@ class Form extends React.Component {
       showLabels: this.props.showLabels,
       fieldTypes: this.props.fieldTypes,
       error: this.state.error,
-      fieldsContext: {
+      fieldComponentProps: this.props.fieldComponentProps,
+      renderContext: {
         renderFormError: ::this.renderFormError,
-        renderSubmit: ::this.renderSubmit,
         submit: ::this.submit,
+        clearError: ::this.clearError,
         isSubmitting: this.state.isSubmitting,
         reset: ::this.reset
       },
-      fieldComponentProps: {
-        ...this.props.fieldComponentProps,
-        clearError: ::this.clearError
-      }
     }
 
     return (
@@ -176,21 +152,6 @@ export const createFormRenderer = (baseOptions) => {
   )
 }
 
-/**
- * renderForm arguments are similar to {@link renderFields}
- * The form handles validation, displaying validation errors, and
- * displaying a submit button for a form. Think of this as an
- * extension of renderFields that can handle the submit button
- * and validations as well.
- *
- * #### Form Lifecycle
- *
- * When the submit button is clicked, the fields are validated
- * client-side with `props.validate`. If there are errors, they will
- * be displayed and execution will end. If there were no errors,
- * `props.submit` will be called with the field values, and it will
- * respect an error payload in return.
- */
 export const renderForm = (schema, options, render) => (
   <Form
     schema={schema}
