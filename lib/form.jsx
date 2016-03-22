@@ -107,7 +107,12 @@ class Form extends React.Component {
     this.setState({ error: null })
   }
 
-  onChange = value => this.setState({ value });
+  onChange = value => {
+    this.setState({ value })
+    if (this.props.onChange) {
+      this.props.onChange(value)
+    }
+  };
 
   renderFormError() {
     const formErrorMessage = this.state.error
@@ -140,9 +145,7 @@ class Form extends React.Component {
     // Allow some props to pass down to `renderFields`.
     const options = {
       value: this.state.value,
-      // If the `onChange` prop is specified, become a controlled
-      // component.
-      onChange: this.props.onChange || this.onChange,
+      onChange: this.onChange,
       fields: this.props.fields,
       showLabels: this.props.showLabels,
       fieldTypes: this.props.fieldTypes,
