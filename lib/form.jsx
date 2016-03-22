@@ -78,7 +78,6 @@ class Form extends React.Component {
     // Perform client-side validation
     const error = await this.props.validate(this.schema, value)
     if (error) {
-      console.error('Form submit error:', error)
       this.setError(error)
       return false
     }
@@ -87,6 +86,7 @@ class Form extends React.Component {
     try {
       res = await this.props.submit(value)
     } catch (error) {
+      console.error('Form submit error:', error)
       this.setError(error)
       return false
     }
