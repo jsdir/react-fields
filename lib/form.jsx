@@ -89,11 +89,11 @@ class Form extends React.Component {
       return false
     }
 
+    this.setState({ isSubmitting: false })
+
     if (this.props.afterSubmit) {
       await this.props.afterSubmit(value, res)
     }
-
-    this.setState({ isSubmitting: false })
   }
 
   reset() {
