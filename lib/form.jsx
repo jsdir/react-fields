@@ -44,6 +44,14 @@ class Form extends React.Component {
     }
   }
 
+  componentDidMount() {
+    this.isMounted = true
+  }
+
+  componentWillUnmount() {
+    this.isMounted = false
+  }
+
   componentWillReceiveProps(nextProps) {
     this.loadProps(nextProps)
 
@@ -89,7 +97,9 @@ class Form extends React.Component {
       return false
     }
 
-    this.setState({ isSubmitting: false })
+    if (this.isMounted) {
+      this.setState({ isSubmitting: false })
+    }
 
     if (this.props.afterSubmit) {
       await this.props.afterSubmit(value, res)
