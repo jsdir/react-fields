@@ -45,11 +45,11 @@ class Form extends React.Component {
   }
 
   componentDidMount() {
-    this.isMounted = true
+    this._isMounted = true
   }
 
   componentWillUnmount() {
-    this.isMounted = false
+    this._isMounted = false
   }
 
   componentWillReceiveProps(nextProps) {
@@ -97,7 +97,7 @@ class Form extends React.Component {
       return false
     }
 
-    if (this.isMounted) {
+    if (this._isMounted) {
       this.setState({ isSubmitting: false })
     }
 
