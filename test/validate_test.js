@@ -226,6 +226,40 @@ describe('validate', () => {
     expect(fieldOptions.rootValue).toEqual({ foo: 'bar' })
   })
 
+  it('should validate `requiredIf`', async () => {
+    const schema = {
+      type: 'object',
+      schema: {
+        foo: {
+          type: 'string',
+          rules: {
+            requiredIf: data => data.bar
+          }
+        },
+        bar: {
+          type: 'string'
+        }
+      }
+    }
+
+    expect(await validate(schema, {})).toEqual(null)
+
+    expect(await validate(schema, {
+      bar: 'baz'
+    })).toEqual({
+      fieldErrors: {
+        foo: {
+          message: 'Foo is required'
+        }
+      }
+    })
+
+    expect(await validate(schema, {
+      foo: 'baz',
+      bar: 'baz'
+    })).toEqual(null)
+  })
+
   describe('field titles', () => {
 
     context('when defined with a schema title', () => {

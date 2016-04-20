@@ -195,6 +195,8 @@ class Fields extends React.Component {
       onChange: fieldData.onChange,
       error: fieldData.fieldError,
       schema: fieldData.fieldSchema,
+      // TODO: This information needs to come from `isFieldRequired`,
+      // an independent callback prop.
       required: _.get(fieldData.fieldSchema, ['rules', 'required']),
       ...this.props.fieldComponentProps,
       ...fieldSchema.fieldComponentProps,
