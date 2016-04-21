@@ -1,4 +1,5 @@
 import React, { PropTypes } from 'react'
+import shallowequal from 'shallowequal'
 
 import { normalizeSchema } from './utils'
 import { renderFields } from './fields'
@@ -58,7 +59,7 @@ class Form extends React.Component {
     // If the value changed, we know that the component
     // is controlled, and that `props.value` is not just
     // the initial value.
-    if (nextProps.value !== this.props.value) {
+    if (!shallowequal(nextProps.value, this.props.value)) {
       this.setState({ value: nextProps.value })
     }
   }
