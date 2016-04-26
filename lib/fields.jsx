@@ -190,6 +190,12 @@ class Fields extends React.Component {
   getPropsForFieldData(fieldData) {
     const { fieldSchema, fieldType } = fieldData
 
+    const fieldComponentProps = {
+      ...this.props.fieldComponentProps,
+      ...fieldSchema.fieldComponentProps,
+      ...(fieldType && fieldType.fieldComponentProps)
+    }
+
     return {
       value: fieldData.value,
       onChange: fieldData.onChange,
@@ -198,9 +204,8 @@ class Fields extends React.Component {
       // TODO: This information needs to come from `isFieldRequired`,
       // an independent callback prop.
       required: _.get(fieldData.fieldSchema, ['rules', 'required']),
-      ...this.props.fieldComponentProps,
-      ...fieldSchema.fieldComponentProps,
-      ...(fieldType && fieldType.fieldComponentProps)
+      ...fieldComponentProps,
+      fieldComponentProps
     }
   }
 
