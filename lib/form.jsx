@@ -23,7 +23,9 @@ class Form extends React.Component {
      * type of button for the form.
      */
     showFormError: PropTypes.bool,
-    renderFormError: PropTypes.func
+    renderFormError: PropTypes.func,
+
+    id: PropTypes.string
   };
 
   static defaultProps = {
@@ -134,6 +136,7 @@ class Form extends React.Component {
   render() {
     // Allow some props to pass down to `renderFields`.
     const options = {
+      id: this.props.id,
       value: this.state.value,
       onChange: this.onChange,
       fields: this.props.fields,

@@ -88,7 +88,9 @@ class Fields extends React.Component {
      */
     fields: PropTypes.array,
     renderContext: PropTypes.object,
-    fieldComponentProps: PropTypes.object
+    fieldComponentProps: PropTypes.object,
+
+    id: PropTypes.string
   };
 
   static defaultProps = {
@@ -175,6 +177,7 @@ class Fields extends React.Component {
       && this.props.fieldTypes[fieldSchema.type]
 
     return {
+      id: this.props.id && [this.props.id].concat(fieldPath).join('__'),
       fieldPath,
       fieldPathString,
       fieldSchema,
@@ -197,6 +200,7 @@ class Fields extends React.Component {
     }
 
     return {
+      id: fieldData.id,
       value: fieldData.value,
       onChange: fieldData.onChange,
       error: fieldData.fieldError,
@@ -234,18 +238,9 @@ class Fields extends React.Component {
         + `have a component`
     )
 
-    /*
-    const errorMessage = fieldError ? (
-      <span className="Field-error">{fieldError}</span>
-    ) : null
-    */
-    // TODO: decide if errors should be shown by default
-    const errorMessage = null
-
     // TODO: merge fieldProps.onChange with props.onChange
     return (
       <div key={fieldPathString}>
-        {errorMessage}
         <FieldComponent {...props} {...fieldProps}/>
       </div>
     )
