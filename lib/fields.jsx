@@ -177,7 +177,8 @@ class Fields extends React.Component {
       && this.props.fieldTypes[fieldSchema.type]
 
     return {
-      id: this.props.id && [this.props.id].concat(fieldPath).join('__'),
+      id: this.props.id && [this.props.id]
+        .concat(fieldPath || []).join('__'),
       fieldPath,
       fieldPathString,
       fieldSchema,
