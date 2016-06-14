@@ -12,7 +12,7 @@ Several different libraries were used or evaluated before building `react-fields
 `react-fields` was designed to not only address these deficiencies, but to also make building forms as quick and bug-free as possible.
 
 - If you are looking for comprehensive documentation of the actual API, check out the [API docs](api.md). This manual is more of an explanatory catalog of features.
-- If you just want to start looking at some code, start with the [#basics]().
+- If you just want to start looking at some code, start with the [Basics]().
 
 # Concepts
 
@@ -20,7 +20,7 @@ Several different libraries were used or evaluated before building `react-fields
 
 #### Form state as a single value
 
-The entire form state, no matter how complex it is or how many nested forms it may contain, is reduced into one immutable value. This form state must conform to a defined schema.
+The entire form state, no matter how complex it is or how many nested forms it may contain, is reduced into one immutable value that is replaced over time. This form state conforms to a defined schema.
 
 Both the form state and the structure of the validation errors map directly to this defined schema. This allows child components to introspectively know the structure of the data that they should be changing.
 
@@ -39,7 +39,7 @@ In order to move input data from child to parent components and to submit data, 
 
 #### Sensible defaults
 
-Although `react-fields` was made to work in complex situations, it is still easy to use in a brand new project while allowing you to slowly and painlessly add additional configuration in the future. Default validators and associated error messages are included, and form errors are displayed by default.
+Although `react-fields` was made to work in complex situations, it is still easy to use in a brand new project while allowing you to slowly and painlessly add additional configuration in the future. Default validators and associated error messages are included, and form errors are always displayed by default.
 
 # Basics
 
@@ -47,64 +47,58 @@ These are the basic parts of `react-fields`:
 
 #### Schema
 
-The schema is the shape of the form state. Here is an example schema:
+The schema is the allowed shape of the form state. Here's an example:
 
 ```js
-{
+import { FieldTypes } from 'react-fields'
+
+const schema = {
   firstName: {
-    type: PropTypes.string,
+    type: FieldTypes.string,
+    required: true,
     rules: {
-      required: true
+      minLength: 3
     }
   },
   lastName: {
-    type: PropTypes.string,
-    rules: {
-      required: true
-    }
+    type: FieldTypes.string
   },
   age: {
-    type: PropTypes.number
+    type: FieldTypes.number
   }
 }
 ```
 
-data presence helps for validation
-validation is also included here
-[add an option to type-check the fields on input, making sure that no outside fields are entered, typecheck with proptypes, these checks will produce actual runtime warnings instead of just validation errors.]
-
-The schema can also contain presentation-specific options to cut down on boilerplate.
+This definition is used for validation and type checking field values on input. While validation errors will be handled by the form, illegal value types will throw runtime warnings. This is very similar to how `PropTypes` work. Read more about defining schemas [here].
 
 #### Field Component
 
-A field component is any component that accepts the `value` and `onChange` props. Lots of existing ReactDOM components like `input` are already valid field components.
-
-`react-fields` will also pass some additional props to fields compoenents that can help with ()[Validation] or presenting validation errors.
-
-- `error`
-- `schema`: the schema of the data that the field component is mutating
+A *field component* is any component that accepts the `value` and `onChange` props. Lots of the existing `react-dom` HTML components like `input` are already valid *field components*. `react-fields` will also pass *field components* some additional props to help with validation and presenting validation errors. Read more about these props [here]().
 
 #### `Fields`
 
-`Fields` us a component that combines the state of one or more field components.
+`Fields` is a component that describes the layout and contains the state of one or more *field components*:
 
 ```
 import { Fields } from 'react-fields'
 
 const schema = {
-  firstName: PropTypes.string,
-  lastName: PropTypes.string.isRequired
+  firstName: FieldTypes.string,
+  lastName: FieldTypes.string.isRequired
 }
 
-const render = (propsFor) => (
-  <div>
+const render = ({ propsFor }) => (
+  <div>  
+    <label>First Name:</label>
     <input {...propsFor('firstName')} />
+    <label>Last Name:</label>
     <input {...propsFor('lastName')} />
   </div>
 )
 
 const defaultValue = {
-  firstName: 'John', lastName: 'Doe'
+  firstName: 'John',
+  lastName: 'Doe'
 }
 
 const fields = (
@@ -112,7 +106,7 @@ const fields = (
     schema={schema}
     render={render}
     value={defaultValue}
-    onChange={user => console.log('new user data:', user)}
+    onChange={user => console.log('changed data:', user)}
   />
 )
 
@@ -121,37 +115,21 @@ ReactDOM.render(fields, document.body)
 
 `propsFor` is a function belonging to the render context. the render context contains other [helpers](TODO: link) as well.
 
-Notice the `value` and `onChange` props on `Fields`. One of the more important parts of `react-fields` is that `Fields` is itself a **field component**. This allows nested groups with reusable groups of fields.
+Notice the `value` and `onChange` props on `Fields`. One of the more important parts of `react-fields` is that `Fields` is itself a *field component*. This allows you to [nest](nested-fields.jsx) one reusable component using `Fields` into another `Fields` component.
 
-// TODO: show example with multiple fields components that are mounted
+`Fields` uses `schema` to prevent bugs by throwing runtime warnings if illegal data is entered.
 
-`Fields` uses the given schema to prevent bugs by throwing runtime warnings if illegal data is entered.
-(``` Typing in the text box will cause a warning since the age field with type number was set with a ```) and unknown field. these only show up in development.
-
-TODO: show the type errors on illegal data
-
-Although using `schema` is highly recommended to prevent unneeded bugs from appearing, you can always quickly define `Fields` without one by using `noSchema`.
-
-```
-renderFields({
-  noSchema: true
-})
-```
-
-A `renderFields` helper is included for convenience to define form components: with stateless
-
-`renderFields(schema, props, render)`
+A `renderFields` convenience helper is included to make defining `Fields` more concise.
 
 ```jsx
 import { renderFields } from 'react-fields'
 
-// TODO: add schema
-export const UserForm = props => renderFields({
+export const UserFields = props => renderFields({
   firstName: { type: PropTypes.string },
   lastName: { type: PropTypes.string }
 }, {
   value: { firstName: 'John', lastName: 'Doe' },
-  onChange: user => console.log('new user values:', user),
+  onChange: user => console.log('changed data:', user),
 }, ({ propsFor }) => (
   <div>
     <input {...propsFor('firstName')} />
@@ -159,24 +137,19 @@ export const UserForm = props => renderFields({
   </div>
 ))
 
-// This just returns a `Fields` component.
+// `UserFields` is a `Fields` component.
 ```
 
-If you can't use splats for `propsFor`, there is a `renderField` method that is defined automatically.
-
-// TODO: show an example of `renderField` (previously `render`)
-
-Another important thing to notice is that `Fields` does not render any submit button or form-level error messages. `Fields` is only supposed to describe the layout of one or more fields, and automatically manages the value of the field components.
+Another important thing to notice is that `Fields` does not render any submit buttons or form-level error messages. It's only supposed to layout of one or more *field components* and is only responsible for managing their collective state. Any other higher-level functionality is instead delegated to the `Form` component.
 
 #### `Form`
 
-`Form` is a component that wraps `Fields` and:
+`Form` is a component that wraps `Fields` and has several responsibilities:
 
 - handles submitting the data
 - performs validation
 - displays validation or submission errors if they exist
-
-You can think of it as the layer between the fields and the persistence layer.
+- displays submit button
 
 Declared just like `Fields`, only with some new props.
 
@@ -327,6 +300,8 @@ swap in a different validator method
 - show the different things inside rendercontext
 
 #### Reducing Boilerplate
+
+The schema can also contain presentation-specific options to cut down on boilerplate.
 
 Several methods are included to reduce the amount of boilerplate it takes to build forms
 `react-fields` lets you define field presentation options like titles, input components in the schema. This allows you to refactor similar fields into their own types. This is helpful for situations where many similar fields need to be rendered., with small enough difference. See the (accounting example) for boilerplate elimination. TODO: give an example of where you would actually use this information.
