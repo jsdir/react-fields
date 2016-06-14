@@ -2,7 +2,7 @@
 
 `react-fields` provides customizable form building for React, complete with type-checking, validation, and other useful utilities.
 
-Several different libraries were used or evaluated before building `react-fields`, yielding the following observations:
+Several different libraries were used and evaluated before building `react-fields`, yielding the following observations:
 
 - **Dependence on other libraries:** Some of the libraries used Redux as a primary dependency for form state without any option to use local component state. `react-fields` uses local component state by default, but also allows you to swap in Redux or any other state management library when necessary, without having to touch your forms.
 - **Not much support for nested data:** There were no easy ways to edit nested data like an array of objects, and mapping nested validation errors back in a presentable way was very difficult. `react-fields` handles nested forms just like normal fields.
