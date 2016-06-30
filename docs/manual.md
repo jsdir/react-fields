@@ -88,7 +88,7 @@ const schema = {
 }
 
 const render = ({ propsFor }) => (
-  <div>  
+  <div>
     <label>First Name:</label>
     <input {...propsFor('firstName')} />
     <label>Last Name:</label>
@@ -113,11 +113,11 @@ const fields = (
 ReactDOM.render(fields, document.body)
 ```
 
-`propsFor` is a function belonging to the render context. the render context contains other [helpers](TODO: link) as well.
+`propsFor` is a function that returns an object with `value` and `onChange` properties. Using JSX spread attributes, we can merge this object into the *field component* props, which will bind the value of the field component to `Fields`. In `Fields`, the `render` function is called with a context object. Along with `propsFor`, this context object has additional properties that can help to create dynamic forms. Read more.
 
 Notice the `value` and `onChange` props on `Fields`. One of the more important parts of `react-fields` is that `Fields` is itself a *field component*. This allows you to [nest](nested-fields.jsx) one reusable component using `Fields` into another `Fields` component.
 
-`Fields` uses `schema` to prevent bugs by throwing runtime warnings if illegal data is entered.
+`Fields` uses the `schema` prop to prevent bugs by throwing runtime warnings if illegal data is entered.
 
 A `renderFields` convenience helper is included to make defining `Fields` more concise.
 
@@ -146,12 +146,14 @@ Another important thing to notice is that `Fields` does not render any submit bu
 
 `Form` is a component that wraps `Fields` and has several responsibilities:
 
-- handles submitting the data
-- performs validation
-- displays validation or submission errors if they exist
-- displays submit button
+- It handles submitting the data to the persistence layer.
+- It performs pre-submit validation
+- It displays validation or submission errors if they occur.
+- It displays a submit button.
 
 Declared just like `Fields`, only with some new props.
+
+`Form` shares many of the same props as `Fields`, with noticeable additions:
 
 ```
 import { Form } from 'react-fields'
