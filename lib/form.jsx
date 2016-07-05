@@ -79,6 +79,9 @@ class Form extends React.Component {
       event.preventDefault()
     }
 
+    // Wait for onChange handlers that are still running.
+    await this.onChangeDeferred
+
     const { value } = this.state
 
     this.clearError()
@@ -121,7 +124,13 @@ class Form extends React.Component {
   onChange = value => {
     this.setState({ value })
     if (this.props.onChange) {
-      this.props.onChange(value)
+      const result = this.props.onChange(value)
+      if (result instanceof Promise) {
+        this.onChangeDeferred = new Promise(async resolve => {
+          await this.props.onChange(value)
+          resolve()
+        })
+      }
     }
   };
 
