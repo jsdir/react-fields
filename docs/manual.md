@@ -28,7 +28,7 @@ Both the form state and the structure of the validation errors map directly to t
 
 Much of React's success is due to its encouragement of decoupling and modularity by passing data from parent to child components through documented `props`.
 
-Forms have to perform the inverse: collect values from child components and combine those values into the parent form state. Complex forms often fall apart because, unlike `propTypes`, there is no real definition of the data being passed upward. `react-fields` tries to alleviate this by constraining the form state to a schema.
+Forms have to perform the inverse: collect values from child components and combine those values into the parent form state. Complex forms often fall apart because, unlike `PropTypes`, there is no real definition of the data being passed upward. `react-fields` tries to alleviate this by constraining the form state to a schema.
 
 In order to move input data from child to parent components and to submit data, `react-fields` recognizes the following non-intersecting levels of responsibility:
 
@@ -60,39 +60,41 @@ const schema = {
       minLength: 3
     }
   },
-  lastName: {
-    type: FieldTypes.string
-  },
-  age: {
-    type: FieldTypes.number
-  }
+  lastName: FieldTypes.string,
+  age: FieldTypes.number
 }
 ```
 
-This definition is used for validation and type checking field values on input. While validation errors will be handled by the form, illegal value types will throw runtime warnings. This is very similar to how `PropTypes` work. Read more about defining schemas [here].
+This definition is used for validation and type checking field values on input. While validation errors will be handled by the form, illegal value types will throw runtime warnings in a manner very similar to how `PropTypes` behave. Read more about defining schemas [here](api/Schema.md).
 
 #### Field Component
 
-A *field component* is any component that accepts the `value` and `onChange` props. Lots of the existing `react-dom` HTML components like `input` are already valid *field components*. `react-fields` will also pass *field components* some additional props to help with validation and presenting validation errors. Read more about these props [here]().
+A *field component* is any component that accepts the `value` and `onChange` props. `react-fields` will also pass *field components* some additional props to help with validation and presenting validation errors. Read more about these props [here](api/FieldComponentProps.md).
 
 #### `Fields`
 
 `Fields` is a component that describes the layout and contains the state of one or more *field components*:
 
-```
-import { Fields } from 'react-fields'
+```jsx
+import React from 'react'
+import ReactDOM from 'react-dom'
+import { Fields, FieldTypes } from 'react-fields'
+import TextInput from 'components/text-input'
 
 const schema = {
-  firstName: FieldTypes.string,
-  lastName: FieldTypes.string.isRequired
+  firstName: {
+    type: FieldTypes.string,
+    required: true
+  },
+  lastName: FieldTypes.string
 }
 
 const render = ({ propsFor }) => (
   <div>
     <label>First Name:</label>
-    <input {...propsFor('firstName')} />
+    <TextInput {...propsFor('firstName')} />
     <label>Last Name:</label>
-    <input {...propsFor('lastName')} />
+    <TextInput {...propsFor('lastName')} />
   </div>
 )
 
@@ -106,41 +108,47 @@ const fields = (
     schema={schema}
     render={render}
     value={defaultValue}
-    onChange={user => console.log('changed data:', user)}
+    onChange={user => console.log('Changed data:', user)}
   />
 )
 
 ReactDOM.render(fields, document.body)
 ```
 
-`propsFor` is a function that returns an object with `value` and `onChange` properties. Using JSX spread attributes, we can merge this object into the *field component* props, which will bind the value of the field component to `Fields`. In `Fields`, the `render` function is called with a context object. Along with `propsFor`, this context object has additional properties that can help to create dynamic forms. Read more.
+`Fields` uses `props.render` to define the layout of the fields and `props.schema` to constrain the shape of the value by throwing runtime warnings if illegal data is entered.
 
-Notice the `value` and `onChange` props on `Fields`. One of the more important parts of `react-fields` is that `Fields` is itself a *field component*. This allows you to [nest](nested-fields.jsx) one reusable component using `Fields` into another `Fields` component.
+Notice the `value` and `onChange` props. One of the more important parts of `react-fields` is that `Fields` is itself a *field component*. This allows you to [nest](../examples/nested-fields.jsx) one reusable component using `Fields` into another `Fields` component.
 
-`Fields` uses the `schema` prop to prevent bugs by throwing runtime warnings if illegal data is entered.
+`props.render` is called with a `FieldsRenderContext` object as the first argument. The most important property on this object is `propsFor`. `propsFor` is a function that returns an object with `value` and `onChange` properties for the field with the given name. Using JSX spread attributes, we can merge this object into the *field component* props. This will bind the value of the *field component* to the state of `Fields`. When the `firstName` input gets a new value, the `onChange` function returned by `propsFor('firstName')` will be called with this new value. `Fields` will then apply this new value to the internal state and will call `props.onChange` with the updated object. Read more about `FieldsRenderContext` and its other helpful properties [here](api/FieldsRenderContext.md).
 
-A `renderFields` convenience helper is included to make defining `Fields` more concise.
+A `renderFields` helper function is included to make defining `Fields` components more concise.
 
 ```jsx
-import { renderFields } from 'react-fields'
+import { FieldTypes, renderFields } from 'react-fields'
 
 export const UserFields = props => renderFields({
-  firstName: { type: PropTypes.string },
-  lastName: { type: PropTypes.string }
+  firstName: {
+    type: FieldTypes.string,
+    required: true
+  },
+  lastName: FieldTypes.string
 }, {
-  value: { firstName: 'John', lastName: 'Doe' },
-  onChange: user => console.log('changed data:', user),
+  value: {
+    firstName: 'John',
+    lastName: 'Doe'
+  },
+  onChange: user => console.log('Changed data:', user),
 }, ({ propsFor }) => (
   <div>
+    <label>First Name:</label>
     <input {...propsFor('firstName')} />
-    <input {...propsFor(lastName')} />
+    <label>Last Name:</label>
+    <input {...propsFor('lastName')} />
   </div>
 ))
-
-// `UserFields` is a `Fields` component.
 ```
 
-Another important thing to notice is that `Fields` does not render any submit buttons or form-level error messages. It's only supposed to layout of one or more *field components* and is only responsible for managing their collective state. Any other higher-level functionality is instead delegated to the `Form` component.
+Another important thing to notice is that `Fields` does not render any submit buttons or form-level error messages. It's only supposed to layout of one or more *field components* and is only responsible for managing their collective state. Any other higher-level functionality is delegated to the `Form` component.
 
 #### `Form`
 
@@ -153,7 +161,7 @@ Another important thing to notice is that `Fields` does not render any submit bu
 
 Declared just like `Fields`, only with some new props.
 
-`Form` shares many of the same props as `Fields`, with noticeable additions:
+`Form` shares many of the same props as `Fields`, with a few noticeable additions:
 
 ```
 import { Form } from 'react-fields'
